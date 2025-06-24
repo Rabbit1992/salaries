@@ -15,6 +15,17 @@
  * @returns {ContentService} JSON响应
  */
 function doGet(e) {
+  // 参数验证
+  if (!e || !e.parameter) {
+    const errorResponse = {
+      success: false,
+      error: '请求参数无效'
+    };
+    return ContentService
+      .createTextOutput(JSON.stringify(errorResponse))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+  
   const action = e.parameter.action;
   let response = {};
   
@@ -106,21 +117,30 @@ function loginUser(e, sheet) {
       // 获取用户表数据
       const usersSheet = sheet.getSheetByName('users');
       if (!usersSheet) {
-        throw new Error('用户表不存在，请检查工作表名称是否为"users"');
+        console.error('用户表不存在，请检查工作表名称是否为"users"');
+        return {
+          success: false,
+          error: '用户表不存在，请检查工作表名称是否为"users"'
+        };
       }
       
       const usersData = usersSheet.getDataRange().getValues();
+      console.log('用户表数据行数:', usersData.length);
+      console.log('用户表标题行:', usersData[0]);
       
       // 跳过标题行，从第二行开始查找
       for (let i = 1; i < usersData.length; i++) {
         const row = usersData[i];
-        const dbUsername = row[0]; // A列：username
-        const dbPassword = row[1]; // B列：password
+        const dbUsername = String(row[0]).trim(); // A列：username，转换为字符串并去除空格
+        const dbPassword = String(row[1]).trim(); // B列：password，转换为字符串并去除空格
         const department = row[2]; // C列：department
         const employeeId = row[3]; // D列：employee_id
         
+        console.log(`检查用户 ${i}: 表格用户名='${dbUsername}', 输入用户名='${username}', 表格密码='${dbPassword}', 输入密码='${password}'`);
+        
         // 验证用户名和密码
         if (dbUsername === username && dbPassword === password) {
+          console.log('找到匹配用户:', dbUsername);
           return {
             success: true,
             user: {
@@ -131,9 +151,14 @@ function loginUser(e, sheet) {
           };
         }
       }
+      
+      console.log('在Google Sheets中未找到匹配的用户');
     } catch (sheetError) {
       console.error('工作表查询错误:', sheetError);
-      // 如果工作表查询出错，继续返回模拟数据的结果
+      return {
+        success: false,
+        error: '工作表查询错误: ' + sheetError.message
+      };
     }
     
     // 用户名或密码错误
