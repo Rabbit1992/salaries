@@ -1,0 +1,37 @@
+{
+  "name": "staff-salary-system",
+  "version": "1.0.0",
+  "description": "基于Google Sheets + Vercel的静态工资查询系统",
+  "main": "public/index.html",
+  "scripts": {
+    "dev": "npx http-server public -p 3000 -o",
+    "build": "echo 'No build step required for static site'",
+    "start": "npx http-server public -p 8080",
+    "test": "echo 'No tests specified'"
+  },
+  "keywords": [
+    "salary",
+    "google-sheets",
+    "vercel",
+    "javascript",
+    "static-site",
+    "payroll",
+    "employee-management"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/staff-salary-system.git"
+  },
+  "homepage": "https://your-project.vercel.app",
+  "bugs": {
+    "url": "https://github.com/yourusername/staff-salary-system/issues"
+  }
+}

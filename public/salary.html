@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工资查询系统 - 查询</title>
+    <link rel="stylesheet" href="../styles/main.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>工资查询系统</h1>
+            <div class="user-info">
+                <span id="userInfo"></span>
+                <button id="logoutBtn" class="btn-secondary">退出登录</button>
+            </div>
+        </div>
+        
+        <div class="query-section">
+            <div class="form-group">
+                <label for="monthSelect">选择月份:</label>
+                <select id="monthSelect">
+                    <option value="">请选择月份</option>
+                </select>
+                <button id="queryBtn" class="btn-primary">查询</button>
+            </div>
+        </div>
+        
+        <div id="salaryResult" class="salary-result" style="display: none;">
+            <h2>工资详情</h2>
+            <table class="salary-table">
+                <thead>
+                    <tr>
+                        <th>月份</th>
+                        <th>基础工资</th>
+                        <th>奖金</th>
+                        <th>扣除项</th>
+                        <th>实发工资</th>
+                    </tr>
+                </thead>
+                <tbody id="salaryTableBody">
+                </tbody>
+            </table>
+        </div>
+        
+        <div id="noDataMessage" class="no-data" style="display: none;">
+            <p>未找到该月份的工资记录</p>
+        </div>
+        
+        <div id="errorMessage" class="error-message" style="display: none;"></div>
+    </div>
+    <script src="../scripts/salary.js"></script>
+</body>
+</html>
