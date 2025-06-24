@@ -1,5 +1,4 @@
 {
-{
   "version": 2,
   "name": "staff-salary-system",
   "rewrites": [
@@ -35,7 +34,7 @@
       ]
     },
     {
-      "source": "/(.*\.(js|css|html))$",
+      "source": "/(.*\\.(js|css|html))$",
       "headers": [
         {
           "key": "Cache-Control",
