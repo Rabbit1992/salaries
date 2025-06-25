@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工资查询系统 - 本地测试页面</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+        }
+        
+        h1 {
+            color: #4a5568;
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 2rem;
+        }
+        
+        .test-section {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            background: #f7fafc;
+        }
+        
+        .test-section h2 {
+            color: #2d3748;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+        
+        .test-item {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: white;
+            border-radius: 6px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .test-item h3 {
+            color: #4a5568;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+        
+        .test-item p {
+            color: #718096;
+            margin-bottom: 0.5rem;
+        }
+        
+        .test-link {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: transform 0.2s ease;
+        }
+        
+        .test-link:hover {
+            transform: translateY(-2px);
+        }
+        
+        .api-test {
+            background: #fff5f5;
+            border-left-color: #e53e3e;
+        }
+        
+        .feature-test {
+            background: #f0fff4;
+            border-left-color: #38a169;
+        }
+        
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            margin: 0.5rem 0;
+            overflow-x: auto;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+        
+        .status-running {
+            background: #38a169;
+            animation: pulse 2s infinite;
+        }
+        
+        .status-stopped {
+            background: #e53e3e;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .info-box {
+            background: #ebf8ff;
+            border: 1px solid #bee3f8;
+            border-radius: 6px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .info-box h4 {
+            color: #2b6cb0;
+            margin-bottom: 0.5rem;
+        }
+        
+        .info-box ul {
+            color: #2c5282;
+            margin-left: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 工资查询系统 - 本地测试页面</h1>
+        
+        <!-- 服务器状态 -->
+        <div class="test-section">
+            <h2>🚀 服务器状态</h2>
+            <div class="test-item">
+                <h3><span class="status-indicator status-running"></span>本地开发服务器</h3>
+                <p>服务器地址: <strong>http://localhost:3000</strong></p>
+                <p>状态: 运行中</p>
+                <div class="code-block">
+                    node server.js
+                </div>
+            </div>
+        </div>
+        
+        <!-- 功能测试 -->
+        <div class="test-section">
+            <h2>🎯 功能测试</h2>
+            
+            <div class="test-item feature-test">
+                <h3>登录页面测试</h3>
+                <p>测试用户登录功能和界面显示</p>
+                <a href="/" class="test-link" target="_blank">打开登录页面</a>
+            </div>
+            
+            <div class="test-item feature-test">
+                <h3>工资查询页面测试</h3>
+                <p>测试工资查询、年度汇总等功能</p>
+                <a href="/salary.html" class="test-link" target="_blank">打开工资查询页面</a>
+            </div>
+        </div>
+        
+        <!-- API测试 -->
+        <div class="test-section">
+            <h2>🔌 API接口测试</h2>
+            
+            <div class="test-item api-test">
+                <h3>登录API测试</h3>
+                <p>测试用户登录接口</p>
+                <div class="code-block">
+POST /api/login
+Content-Type: application/json
+
+{
+  "username": "测试用户名",
+  "password": "测试密码"
+}
+                </div>
+                <button onclick="testLoginAPI()" class="test-link">测试登录API</button>
+            </div>
+            
+            <div class="test-item api-test">
+                <h3>工资查询API测试</h3>
+                <p>测试工资数据查询接口</p>
+                <div class="code-block">
+POST /api/getSalaries
+Content-Type: application/json
+
+{
+  "username": "测试用户名",
+  "month": "2025-03"
+}
+                </div>
+                <button onclick="testSalaryAPI()" class="test-link">测试工资查询API</button>
+            </div>
+        </div>
+        
+        <!-- 测试数据 -->
+        <div class="test-section">
+            <h2>📊 测试数据说明</h2>
+            
+            <div class="info-box">
+                <h4>测试用户信息</h4>
+                <ul>
+                    <li>用户名: 根据飞书多维表格中的实际用户数据</li>
+                    <li>密码: 对应用户的密码字段</li>
+                    <li>部门: 自动从飞书获取</li>
+                </ul>
+            </div>
+            
+            <div class="info-box">
+                <h4>工资数据范围</h4>
+                <ul>
+                    <li>时间范围: 2025年1月开始</li>
+                    <li>数据来源: 飞书多维表格</li>
+                    <li>字段包含: 基础工资、绩效奖金、津贴、扣除项、实发工资</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- 测试结果 -->
+        <div class="test-section">
+            <h2>📋 测试结果</h2>
+            <div id="testResults" style="min-height: 100px; background: white; padding: 1rem; border-radius: 6px; border: 1px solid #e2e8f0;">
+                <p style="color: #718096; text-align: center;">点击上方按钮开始API测试，结果将显示在这里</p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // API测试函数
+        async function testLoginAPI() {
+            const resultDiv = document.getElementById('testResults');
+            resultDiv.innerHTML = '<p>🔄 正在测试登录API...</p>';
+            
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: '测试用户',
+                        password: '测试密码'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `
+                    <h4>✅ 登录API测试结果</h4>
+                    <p><strong>状态码:</strong> ${response.status}</p>
+                    <p><strong>响应数据:</strong></p>
+                    <pre style="background: #f7fafc; padding: 1rem; border-radius: 4px; overflow-x: auto;">${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <h4>❌ 登录API测试失败</h4>
+                    <p><strong>错误信息:</strong> ${error.message}</p>
+                `;
+            }
+        }
+        
+        async function testSalaryAPI() {
+            const resultDiv = document.getElementById('testResults');
+            resultDiv.innerHTML = '<p>🔄 正在测试工资查询API...</p>';
+            
+            try {
+                const response = await fetch('/api/getSalaries', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: '测试用户',
+                        month: '2025-03'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `
+                    <h4>✅ 工资查询API测试结果</h4>
+                    <p><strong>状态码:</strong> ${response.status}</p>
+                    <p><strong>响应数据:</strong></p>
+                    <pre style="background: #f7fafc; padding: 1rem; border-radius: 4px; overflow-x: auto;">${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <h4>❌ 工资查询API测试失败</h4>
+                    <p><strong>错误信息:</strong> ${error.message}</p>
+                `;
+            }
+        }
+        
+        // 页面加载时显示当前时间
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const timeStr = now.toLocaleString('zh-CN');
+            document.title += ` - ${timeStr}`;
+        });
+    </script>
+</body>
+</html>
