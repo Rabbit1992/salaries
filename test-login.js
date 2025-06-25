@@ -1,11 +1,11 @@
-// Vercel Serverless Function - 用户登录API
+// 测试登录功能的脚本
+// 运行命令: node test-login.js
 
 const feishuConfig = {
-  APP_ID: process.env.FEISHU_APP_ID || 'cli_a8d0a9945631d013',
-  APP_SECRET: process.env.FEISHU_APP_SECRET || 'Y9Js8PdijoLrfNpmRGdFXfdM7BNWRkvd',
-  APP_TOKEN: process.env.FEISHU_APP_TOKEN || 'KvyUbXEBpaQVcbsYQcIc3oDnnKc',
-  USER_TABLE_ID: process.env.FEISHU_USER_TABLE_ID || 'tblUwpIiulO5QfS4',
-  SALARY_TABLE_ID: process.env.FEISHU_SALARY_TABLE_ID || 'tblhjBxxfDbEx1Kt'
+  APP_ID: 'cli_a8d0a9945631d013',
+  APP_SECRET: 'Y9Js8PdijoLrfNpmRGdFXfdM7BNWRkvd',
+  APP_TOKEN: 'KvyUbXEBpaQVcbsYQcIc3oDnnKc',
+  USER_TABLE_ID: 'tblUwpIiulO5QfS4'
 };
 
 // 获取飞书租户访问令牌
@@ -75,8 +75,12 @@ async function loginUser(username, password, token) {
       return { success: false, error: '用户不存在' };
     }
     
+    console.log('🔍 找到用户:', user.fields);
+    
     // 飞书字段值是对象数组格式，需要提取text属性
     const userPassword = user.fields['密码'][0]?.text;
+    console.log(`🔐 数据库密码: ${userPassword}, 输入密码: ${password}`);
+    
     if (userPassword !== password) {
       return { success: false, error: '密码错误' };
     }
@@ -96,42 +100,31 @@ async function loginUser(username, password, token) {
   }
 }
 
-// Vercel Serverless Function 主函数
-export default async function handler(req, res) {
-  // 设置CORS头
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+// 测试登录功能
+async function testLogin() {
+  console.log('🧪 开始测试登录功能...');
   
-  // 处理预检请求
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
+  const token = await getTenantAccessToken();
+  if (!token) {
+    console.log('❌ 无法获取访问令牌');
     return;
   }
   
-  if (req.method !== 'POST') {
-    return res.status(405).json({ success: false, error: '仅支持POST请求' });
-  }
+  // 使用从用户表中看到的实际数据进行测试
+  const testUsername = 'lijing';
+  const testPassword = '123456';
   
-  try {
-    const { username, password } = req.body;
-    
-    if (!username || !password) {
-      return res.status(400).json({ success: false, error: '用户名和密码不能为空' });
-    }
-    
-    // 获取飞书访问令牌
-    const token = await getTenantAccessToken();
-    if (!token) {
-      return res.status(500).json({ success: false, error: '获取飞书凭证失败' });
-    }
-    
-    // 执行登录验证
-    const result = await loginUser(username, password, token);
-    
-    return res.status(200).json(result);
-  } catch (error) {
-    console.error('登录API错误:', error);
-    return res.status(500).json({ success: false, error: '服务器内部错误' });
+  console.log(`\n🔑 测试登录: 用户名=${testUsername}, 密码=${testPassword}`);
+  
+  const result = await loginUser(testUsername, testPassword, token);
+  
+  if (result.success) {
+    console.log('✅ 登录成功!');
+    console.log('👤 用户信息:', result.user);
+  } else {
+    console.log('❌ 登录失败:', result.error);
   }
 }
+
+// 运行测试
+testLogin();

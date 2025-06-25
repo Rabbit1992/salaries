@@ -98,6 +98,7 @@ async function testUserTable(token) {
       
       if (data.data.items.length > 0) {
         console.log('📝 第一条用户记录字段:', Object.keys(data.data.items[0].fields));
+        console.log('📄 第一条用户记录内容:', data.data.items[0].fields);
       }
       return true;
     } else {

@@ -58,7 +58,8 @@ async function getUserEmployeeId(token, username) {
     
     const data = await response.json();
     if (data.code === 0 && data.data.items.length > 0) {
-      return data.data.items[0].fields['工号'];
+      // 飞书字段值是对象数组格式，需要提取text属性
+      return data.data.items[0].fields['工号'][0]?.text;
     }
     return null;
   } catch (error) {
@@ -108,12 +109,13 @@ async function querySalaries(token, employeeId, month) {
     const data = await response.json();
     if (data.code === 0) {
       return data.data.items.map(item => ({
-        month: item.fields['年月'],
-        basicSalary: item.fields['基本工资'] || 0,
-        performanceBonus: item.fields['绩效奖金'] || 0,
-        allowance: item.fields['津贴补助'] || 0,
-        deduction: item.fields['扣除项目'] || 0,
-        netSalary: item.fields['实发工资'] || 0
+        // 飞书字段值是对象数组格式，需要提取text属性
+        month: item.fields['年月'][0]?.text,
+        basicSalary: parseFloat(item.fields['基本工资'][0]?.text) || 0,
+        performanceBonus: parseFloat(item.fields['绩效奖金'][0]?.text) || 0,
+        allowance: parseFloat(item.fields['津贴补助'][0]?.text) || 0,
+        deduction: parseFloat(item.fields['扣除项目'][0]?.text) || 0,
+        netSalary: parseFloat(item.fields['实发工资'][0]?.text) || 0
       }));
     }
     return [];
