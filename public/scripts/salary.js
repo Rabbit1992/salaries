@@ -212,10 +212,10 @@ function displaySalaryData(data) {
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>${formatMonth(salary.month)}</td>
-            <td>¥${formatCurrency(salary.basicSalary)}</td>
-            <td>¥${formatCurrency(salary.performanceBonus + salary.allowance)}</td>
+            <td>¥${formatCurrency(salary.basicSalary || 0)}</td>
+            <td>¥${formatCurrency((salary.performanceBonus || 0) + (salary.allowance || 0))}</td>
             <td>¥${formatCurrency(salary.deduction || 0)}</td>
-            <td class="net-salary">¥${formatCurrency(salary.netSalary)}</td>
+            <td class="net-salary">¥${formatCurrency(salary.netSalary || 0)}</td>
         `;
         salaryTableBody.appendChild(row);
     });
@@ -232,7 +232,12 @@ function formatMonth(monthStr) {
 
 // 格式化货币显示
 function formatCurrency(amount) {
-    return new Intl.NumberFormat('zh-CN').format(amount);
+    // 确保amount是有效数值
+    const numAmount = parseFloat(amount);
+    if (isNaN(numAmount)) {
+        return '0';
+    }
+    return new Intl.NumberFormat('zh-CN').format(numAmount);
 }
 
 // 显示无数据消息
