@@ -342,14 +342,87 @@ body {
     color: #2d3748;
 }
 
+/* 登录页面样式 */
 .container {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     padding: 2rem;
-    min-width: 400px;
-    max-width: 800px;
+}
+
+.login-form {
+    background: white;
+    padding: 3rem;
+    border-radius: 12px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
     width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+
+.login-form h1 {
+    color: #2d3748;
+    margin-bottom: 2rem;
+    font-size: 2rem;
+    font-weight: 600;
+}
+
+/* 登录页面移动端适配 */
+@media (max-width: 768px) {
+    .container {
+        padding: 1rem;
+        align-items: flex-start;
+        padding-top: 10vh;
+    }
+    
+    .login-form {
+        padding: 2rem;
+        margin: 0;
+        border-radius: 8px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    }
+    
+    .login-form h1 {
+        font-size: 1.75rem;
+        margin-bottom: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 0.75rem;
+        padding-top: 8vh;
+    }
+    
+    .login-form {
+        padding: 1.5rem;
+        border-radius: 6px;
+    }
+    
+    .login-form h1 {
+        font-size: 1.5rem;
+        margin-bottom: 1.25rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1rem;
+    }
+    
+    .form-group label {
+        font-size: 0.9rem;
+    }
+    
+    .form-group input {
+        padding: 0.75rem;
+        font-size: 0.9rem;
+    }
+    
+    .btn-primary {
+        padding: 0.875rem 1.5rem;
+        font-size: 0.9rem;
+    }
 }
 
 /* 查询控制面板 */
@@ -921,42 +994,222 @@ body {
     font-size: 1.1rem;
 }
 
+/* 移动端菜单按钮 */
+.mobile-menu-btn {
+    display: none;
+    background: none;
+    border: none;
+    color: #4a5568;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.mobile-menu-btn:hover {
+    background: #edf2f7;
+    color: #2d3748;
+}
+
 /* 响应式设计 */
-@media (max-width: 768px) {
-    .container {
-        margin: 1rem;
-        padding: 1.5rem;
-        min-width: unset;
+/* 平板端适配 (1024px以下) */
+@media (max-width: 1024px) {
+    .sidebar {
+        width: 240px;
     }
     
-    .header {
-        flex-direction: column;
+    .main-content {
+        margin-left: 240px;
+    }
+    
+    .top-header {
+        padding: 1rem 1.5rem;
+    }
+    
+    .salary-overview {
+        grid-template-columns: repeat(2, 1fr);
         gap: 1rem;
-        text-align: center;
+    }
+}
+
+/* 移动端适配 (768px以下) */
+@media (max-width: 768px) {
+    .mobile-menu-btn {
+        display: block;
+    }
+    
+    .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        width: 280px;
+        z-index: 1001;
+    }
+    
+    .sidebar.mobile-open {
+        transform: translateX(0);
+    }
+    
+    .sidebar.mobile-open::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 280px;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: -1;
+    }
+    
+    .main-content {
+        margin-left: 0;
+        width: 100%;
+    }
+    
+    .top-header {
+        padding: 1rem;
+        flex-wrap: wrap;
+    }
+    
+    .header-left {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .page-title {
+        font-size: 1.25rem;
+    }
+    
+    .breadcrumb {
+        display: none;
+    }
+    
+    .header-right {
+        margin-top: 0.5rem;
+    }
+    
+    .user-details {
+        display: none;
+    }
+    
+    .salary-overview {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        margin: 1rem;
+    }
+    
+    .overview-card {
+        padding: 1rem;
+    }
+    
+    .card-title {
+        font-size: 0.9rem;
+    }
+    
+    .card-value {
+        font-size: 1.5rem;
+    }
+    
+    .query-panel {
+        margin: 1rem;
+        padding: 1rem;
     }
     
     .query-section .form-group {
         flex-direction: column;
         align-items: stretch;
+        gap: 0.5rem;
     }
     
     .query-section select {
         max-width: none;
+        width: 100%;
     }
     
     .btn-primary {
         margin-left: 0;
         margin-top: 1rem;
         width: 100%;
+        padding: 0.875rem;
+    }
+    
+    .stats-panel {
+        margin: 1rem;
+        padding: 1rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+    
+    .data-table {
+        margin: 1rem;
+        overflow-x: auto;
     }
     
     .salary-table {
-        font-size: 0.9rem;
+        font-size: 0.85rem;
+        min-width: 600px;
     }
     
     .salary-table th,
     .salary-table td {
         padding: 0.75rem 0.5rem;
+        white-space: nowrap;
+    }
+}
+
+/* 小屏手机适配 (480px以下) */
+@media (max-width: 480px) {
+    .top-header {
+        padding: 0.75rem;
+    }
+    
+    .page-title {
+        font-size: 1.1rem;
+    }
+    
+    .page-title i {
+        display: none;
+    }
+    
+    .salary-overview {
+        margin: 0.75rem;
+    }
+    
+    .overview-card {
+        padding: 0.875rem;
+    }
+    
+    .card-value {
+        font-size: 1.25rem;
+    }
+    
+    .query-panel,
+    .stats-panel,
+    .data-table {
+        margin: 0.75rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .btn-primary {
+        font-size: 0.9rem;
+        padding: 0.75rem;
+    }
+    
+    .salary-table {
+        font-size: 0.8rem;
+    }
+    
+    .salary-table th,
+    .salary-table td {
+        padding: 0.5rem 0.25rem;
     }
 }
 

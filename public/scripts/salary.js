@@ -60,7 +60,41 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error('解析用户信息失败:', error);
         logout();
     }
+    
+    initializeResponsive();
 });
+
+// 移动端菜单切换
+function toggleMobileMenu() {
+    const sidebar = document.querySelector('.sidebar');
+    sidebar.classList.toggle('mobile-open');
+}
+
+// 初始化响应式功能
+function initializeResponsive() {
+    // 监听窗口大小变化
+    window.addEventListener('resize', function() {
+        const sidebar = document.querySelector('.sidebar');
+        if (window.innerWidth > 768) {
+            // 桌面端时移除移动端类
+            sidebar.classList.remove('mobile-open');
+        }
+    });
+    
+    // 点击遮罩层关闭菜单
+    document.addEventListener('click', function(e) {
+        const sidebar = document.querySelector('.sidebar');
+        const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+        
+        if (sidebar.classList.contains('mobile-open') && 
+            !sidebar.contains(e.target) && 
+            !mobileMenuBtn.contains(e.target)) {
+            sidebar.classList.remove('mobile-open');
+        }
+    });
+    
+    console.log('响应式功能已初始化');
+}
 
 /**
  * 初始化页面函数
