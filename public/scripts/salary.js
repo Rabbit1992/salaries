@@ -187,13 +187,14 @@ async function getSalaries(username, month) {
     }
     
     try {
-        const url = `${SCRIPT_URL}?action=getSalaries&username=${encodeURIComponent(username)}&month=${encodeURIComponent(month)}`;
+        const url = SCRIPT_URL;
         
         const response = await fetch(url, {
-            method: 'GET',
+            method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-            }
+            },
+            body: JSON.stringify({ action: 'getSalaries', username: username, month: month })
         });
         
         if (!response.ok) {

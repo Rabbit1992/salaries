@@ -18,7 +18,21 @@
  * @param {Object} e - Google Apps Script提供的请求事件对象，包含URL参数
  * @returns {ContentService} 返回JSON格式的HTTP响应
  */
+function doPost(e) {
+  try {
+    const requestData = JSON.parse(e.postData.contents);
+    e.parameter = requestData;
+    return handleRequest(e);
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({ success: false, error: 'Invalid POST data' })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
 function doGet(e) {
+  return handleRequest(e);
+}
+
+function handleRequest(e) {
   // 验证请求参数的有效性，确保e对象和parameter属性存在
   if (!e || !e.parameter) {
     const errorResponse = {
@@ -67,9 +81,10 @@ function doGet(e) {
   }
   
   // 返回JSON响应
-  return ContentService
-    .createTextOutput(JSON.stringify(response))
+  const output = ContentService.createTextOutput(JSON.stringify(response))
     .setMimeType(ContentService.MimeType.JSON);
+  output.addHeader('Access-Control-Allow-Origin', 'https://salaries-chi.vercel.app');
+  return output;
 }
 
 /**
@@ -77,10 +92,15 @@ function doGet(e) {
  * 功能：为跨域请求提供支持
  * 设置必要的CORS头部以允许跨域访问
  */
-function doOptions() {
-  return ContentService
-    .createTextOutput('')
-    .setMimeType(ContentService.MimeType.TEXT);
+function doOptions(e) {
+  const response = ContentService.createTextOutput('');
+  response.withHeaders({
+    'Access-Control-Allow-Origin': 'https://salaries-chi.vercel.app',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Max-Age': '86400' // 缓存预检请求24小时
+  });
+  return response;
 }
 
 /**

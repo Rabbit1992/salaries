@@ -97,16 +97,16 @@ async function login(username, password) {
     }
     
     try {
-        // 构建API请求URL，使用GET方法传递参数
-        // encodeURIComponent确保用户名和密码中的特殊字符被正确编码
-        const url = `${SCRIPT_URL}?action=login&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`;
+        // 构建API请求URL
+        const url = SCRIPT_URL;
         
         // 发送HTTP请求到Google Apps Script
         const response = await fetch(url, {
-            method: 'GET',
+            method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-            }
+            },
+            body: JSON.stringify({ action: 'login', username, password })
         });
         
         // 检查HTTP响应状态
