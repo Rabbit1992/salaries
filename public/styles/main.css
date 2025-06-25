@@ -713,6 +713,15 @@ body {
     overflow: hidden;
 }
 
+/* 桌面端显示表格，隐藏移动端卡片 */
+.table-container {
+    display: block;
+}
+
+.mobile-salary-cards {
+    display: none;
+}
+
 .table-header {
     display: flex;
     justify-content: space-between;
@@ -1154,15 +1163,83 @@ body {
         overflow-x: auto;
     }
     
-    .salary-table {
-        font-size: 0.85rem;
-        min-width: 600px;
+    /* 移动端隐藏传统表格 */
+    .table-container {
+        display: none;
     }
     
-    .salary-table th,
-    .salary-table td {
-        padding: 0.75rem 0.5rem;
-        white-space: nowrap;
+    /* 移动端卡片式布局 */
+    .mobile-salary-cards {
+        display: block;
+        margin: 1rem;
+    }
+    
+    .salary-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.25rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        border-left: 4px solid #4299e1;
+    }
+    
+    .salary-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .salary-month {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #2d3748;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .salary-net {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #38a169;
+    }
+    
+    .salary-details {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+    }
+    
+    .salary-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+    
+    .salary-item-label {
+        font-size: 0.8rem;
+        color: #718096;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+    
+    .salary-item-value {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #2d3748;
+    }
+    
+    .salary-item.deduction .salary-item-value {
+        color: #e53e3e;
+    }
+    
+    .salary-item.bonus .salary-item-value {
+        color: #d69e2e;
     }
 }
 
@@ -1207,13 +1284,39 @@ body {
         padding: 0.75rem;
     }
     
-    .salary-table {
-        font-size: 0.8rem;
+    /* 小屏手机卡片优化 */
+    .mobile-salary-cards {
+        margin: 0.75rem;
     }
     
-    .salary-table th,
-    .salary-table td {
-        padding: 0.5rem 0.25rem;
+    .salary-card {
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .salary-card-header {
+        margin-bottom: 0.75rem;
+        padding-bottom: 0.5rem;
+    }
+    
+    .salary-month {
+        font-size: 1rem;
+    }
+    
+    .salary-net {
+        font-size: 1.1rem;
+    }
+    
+    .salary-details {
+        gap: 0.5rem;
+    }
+    
+    .salary-item-label {
+        font-size: 0.75rem;
+    }
+    
+    .salary-item-value {
+        font-size: 0.9rem;
     }
 }
 

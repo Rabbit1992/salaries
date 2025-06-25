@@ -267,10 +267,12 @@ async function getSalaries(username, month) {
 
 // 显示工资数据
 function displaySalaryData(data) {
-    // 清空表格
+    // 清空表格和移动端卡片
     salaryTableBody.innerHTML = '';
+    const mobileSalaryCards = document.getElementById('mobileSalaryCards');
+    mobileSalaryCards.innerHTML = '';
     
-    // 添加数据行
+    // 添加数据行到表格
     data.forEach(salary => {
         const row = document.createElement('tr');
         row.innerHTML = `
@@ -283,8 +285,57 @@ function displaySalaryData(data) {
         salaryTableBody.appendChild(row);
     });
     
+    // 添加数据到移动端卡片
+    data.forEach(salary => {
+        const card = createMobileSalaryCard(salary);
+        mobileSalaryCards.appendChild(card);
+    });
+    
     // 显示结果表格
     salaryResult.style.display = 'block';
+}
+
+// 创建移动端工资卡片
+function createMobileSalaryCard(salary) {
+    const card = document.createElement('div');
+    card.className = 'salary-card';
+    
+    const bonusAllowance = (salary.performanceBonus || 0) + (salary.allowance || 0);
+    
+    card.innerHTML = `
+        <div class="salary-card-header">
+            <div class="salary-month">
+                <i class="fas fa-calendar"></i>
+                ${formatMonth(salary.month)}
+            </div>
+            <div class="salary-net">¥${formatCurrency(salary.netSalary || 0)}</div>
+        </div>
+        <div class="salary-details">
+            <div class="salary-item">
+                <div class="salary-item-label">
+                    <i class="fas fa-money-bill"></i>
+                    基础工资
+                </div>
+                <div class="salary-item-value">¥${formatCurrency(salary.basicSalary || 0)}</div>
+            </div>
+            <div class="salary-item bonus">
+                <div class="salary-item-label">
+                    <i class="fas fa-star"></i>
+                    奖金津贴
+                </div>
+                <div class="salary-item-value">¥${formatCurrency(bonusAllowance)}</div>
+            </div>
+            <div class="salary-item deduction">
+                <div class="salary-item-label">
+                    <i class="fas fa-minus"></i>
+                    扣除项
+                </div>
+                <div class="salary-item-value">¥${formatCurrency(salary.deduction || 0)}</div>
+            </div>
+        </div>
+    `;
+    
+    return card;
 }
 
 // 格式化月份显示
