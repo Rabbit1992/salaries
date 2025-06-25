@@ -212,10 +212,10 @@ function displaySalaryData(data) {
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>${formatMonth(salary.month)}</td>
-            <td>¥${formatCurrency(salary.base_salary)}</td>
-            <td>¥${formatCurrency(salary.bonus)}</td>
-            <td>¥${formatCurrency(salary.deductions || salary.deduction || 0)}</td>
-            <td class="net-salary">¥${formatCurrency(salary.net_salary)}</td>
+            <td>¥${formatCurrency(salary.basicSalary)}</td>
+            <td>¥${formatCurrency(salary.performanceBonus + salary.allowance)}</td>
+            <td>¥${formatCurrency(salary.deduction || 0)}</td>
+            <td class="net-salary">¥${formatCurrency(salary.netSalary)}</td>
         `;
         salaryTableBody.appendChild(row);
     });

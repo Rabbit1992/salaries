@@ -108,15 +108,24 @@ async function querySalaries(token, employeeId, month) {
     
     const data = await response.json();
     if (data.code === 0) {
-      return data.data.items.map(item => ({
-        // 飞书字段值是对象数组格式，需要提取text属性
-        month: item.fields['年月'][0]?.text,
-        basicSalary: parseFloat(item.fields['基本工资'][0]?.text) || 0,
-        performanceBonus: parseFloat(item.fields['绩效奖金'][0]?.text) || 0,
-        allowance: parseFloat(item.fields['津贴补助'][0]?.text) || 0,
-        deduction: parseFloat(item.fields['扣除项目'][0]?.text) || 0,
-        netSalary: parseFloat(item.fields['实发工资'][0]?.text) || 0
-      }));
+      return data.data.items.map(item => {
+        // 处理不同字段的数据格式
+        const getFieldValue = (field) => {
+          if (Array.isArray(field) && field.length > 0) {
+            return field[0]?.text || field[0];
+          }
+          return field;
+        };
+        
+        return {
+          month: getFieldValue(item.fields['年月']),
+          basicSalary: parseFloat(getFieldValue(item.fields['基本工资'])) || 0,
+          performanceBonus: parseFloat(getFieldValue(item.fields['绩效奖金'])) || 0,
+          allowance: parseFloat(getFieldValue(item.fields['津贴补助'])) || 0,
+          deduction: parseFloat(getFieldValue(item.fields['扣除项目'])) || 0,
+          netSalary: parseFloat(getFieldValue(item.fields['实发工资'])) || 0
+        };
+      });
     }
     return [];
   } catch (error) {
@@ -139,7 +148,7 @@ async function getSalaries(username, month, token) {
     
     return {
       success: true,
-      data: salaries
+      salaries: salaries
     };
   } catch (error) {
     console.error('获取工资数据失败:', error);
