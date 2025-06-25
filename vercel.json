@@ -3,6 +3,10 @@
   "name": "staff-salary-system",
   "rewrites": [
     {
+      "source": "/api/proxy/:path*",
+      "destination": "https://script.google.com/macros/s/AKfycbxNJtLbL1fhYW4b2IzJuy1ejOXofyQraqc8ruTOLj0gdsi8fNljaFj2w4F9f1qgTBYc/exec"
+    },
+    {
       "source": "/",
       "destination": "/public/index.html"
     },
