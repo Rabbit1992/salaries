@@ -1,13 +1,12 @@
-// 配置Google Apps Script的Web应用URL
+// 配置后端API的Web应用URL
 /**
  * 工资查询页面脚本文件
  * 功能：处理用户工资查询、显示工资详情、用户登出等操作
  * 依赖：需要用户已通过auth.js完成登录验证
  */
 
-// Google Apps Script Web应用URL配置
-// 注意：此URL需要替换为您实际部署的Google Apps Script Web应用地址
-const SCRIPT_URL = '/api/proxy';
+// 配置 - 使用Vercel API端点
+const API_BASE = '/api';
 
 // 页面DOM元素引用
 const userInfo = document.getElementById('userInfo');           // 用户信息显示区域
@@ -147,16 +146,14 @@ async function querySalary() {
         // 调用后端API获取工资数据
         const result = await getSalaries(currentUser.username, selectedMonth);
         
-        // 处理API返回的数据，支持多种数据结构格式
-        if (result.success && result.salaries && result.salaries.length > 0) {
-            // 标准数据结构：result.salaries
-            displaySalaryData(result.salaries);
-        } else if (result.success && result.data && result.data.length > 0) {
-            // 兼容旧版本数据结构：result.data
-            displaySalaryData(result.data);
+        if (result.success && result.salaries) {
+            if (result.salaries.length > 0) {
+                displaySalaryData(result.salaries);
+            } else {
+                showNoData();
+            }
         } else {
-            // 查询成功但无数据
-            showNoData();
+            showError(result.error || '查询失败');
         }
     } catch (error) {
         // 捕获并处理查询过程中的错误
@@ -179,24 +176,22 @@ async function querySalary() {
  * 容错：如果API调用失败，会自动回退到模拟数据
  */
 async function getSalaries(username, month) {
-    // 检查是否配置了有效的Google Apps Script URL
-    // 如果未配置，则使用模拟数据进行演示，便于开发和测试
-    if (SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') {
-        console.warn('请配置Google Apps Script URL');
-        return simulateGetSalaries(username, month);
+    if (SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE' || !SCRIPT_URL) {
+        throw new Error('系统配置不完整，无法查询工资。');
     }
-    
+
     try {
-        const url = SCRIPT_URL;
-        
-        const response = await fetch(url, {
+        const response = await fetch(`${API_BASE}/getSalaries`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ action: 'getSalaries', username: username, month: month })
+            body: JSON.stringify({
+                username: username,
+                month: month
+            })
         });
-        
+
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -204,64 +199,12 @@ async function getSalaries(username, month) {
         const result = await response.json();
         return result;
     } catch (error) {
-        console.warn('Google Apps Script API调用失败，使用模拟数据:', error);
-        // 如果API调用失败，回退到模拟数据
-        return simulateGetSalaries(username, month);
+        console.error('API调用失败:', error);
+        throw error; // 将错误向上抛出，由调用者处理
     }
 }
 
-// 模拟获取工资数据（用于演示）
-function simulateGetSalaries(username, month) {
-    // 模拟工资数据
-    const mockSalaryData = {
-        'admin': {
-            '2024-01': { base_salary: 15000, bonus: 3000, deductions: 1500, net_salary: 16500 },
-            '2024-02': { base_salary: 15000, bonus: 2500, deductions: 1500, net_salary: 16000 },
-            '2024-03': { base_salary: 15000, bonus: 3500, deductions: 1500, net_salary: 17000 }
-        },
-        'zhang.san': {
-            '2024-01': { base_salary: 12000, bonus: 2000, deductions: 1200, net_salary: 12800 },
-            '2024-02': { base_salary: 12000, bonus: 1800, deductions: 1200, net_salary: 12600 },
-            '2024-03': { base_salary: 12000, bonus: 2200, deductions: 1200, net_salary: 13000 }
-        },
-        'li.si': {
-            '2024-01': { base_salary: 10000, bonus: 1500, deductions: 1000, net_salary: 10500 },
-            '2024-02': { base_salary: 10000, bonus: 1200, deductions: 1000, net_salary: 10200 },
-            '2024-03': { base_salary: 10000, bonus: 1800, deductions: 1000, net_salary: 10800 }
-        },
-        'wang.wu': {
-            '2024-01': { base_salary: 11000, bonus: 1800, deductions: 1100, net_salary: 11700 },
-            '2024-02': { base_salary: 11000, bonus: 1600, deductions: 1100, net_salary: 11500 },
-            '2024-03': { base_salary: 11000, bonus: 2000, deductions: 1100, net_salary: 11900 }
-        }
-    };
-    
-    // 模拟网络延迟
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            const userData = mockSalaryData[username];
-            const salaryData = userData ? userData[month] : null;
-            
-            if (salaryData) {
-                resolve({
-                    success: true,
-                    salaries: [{
-                        month: month,
-                        base_salary: salaryData.base_salary,
-                        bonus: salaryData.bonus,
-                        deductions: salaryData.deductions,
-                        net_salary: salaryData.net_salary
-                    }]
-                });
-            } else {
-                resolve({
-                    success: false,
-                    salaries: []
-                });
-            }
-        }, 800); // 模拟800ms延迟
-    });
-}
+
 
 // 显示工资数据
 function displaySalaryData(data) {

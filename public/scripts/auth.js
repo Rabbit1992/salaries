@@ -5,9 +5,8 @@
  * 创建时间：2024年
  */
 
-// Google Apps Script Web应用的部署URL
-// 注意：每次重新部署Google Apps Script时，此URL可能会发生变化
-const SCRIPT_URL = '/api/proxy';
+// 配置 - 使用Vercel API端点
+const API_BASE = '/api';
 
 // 获取页面DOM元素引用
 // 这些元素在index.html中定义
@@ -87,86 +86,36 @@ loginForm.addEventListener('submit', async function(e) {
  * 功能：向Google Apps Script后端发送登录请求进行身份验证
  * 参数：username - 用户名, password - 密码
  * 返回：Promise对象，包含登录结果
- * 容错：如果API调用失败，会自动回退到模拟登录模式
  */
 async function login(username, password) {
     // 检查是否配置了有效的Google Apps Script URL
-    if (SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') {
-        console.warn('请配置Google Apps Script URL');
-        return simulateLogin(username, password);
-    }
-    
-    try {
-        // 构建API请求URL
-        const url = SCRIPT_URL;
-        
-        // 发送HTTP请求到Google Apps Script
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ action: 'login', username, password })
-        });
-        
-        // 检查HTTP响应状态
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+    if (SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE' || SCRIPT_URL === '/api/proxy') {
+        console.error('错误：Google Apps Script URL未配置或为代理地址，请提供真实的部署URL。');
+        // 在实际生产中，代理地址 '/api/proxy' 是有效的，但为了演示清晰，这里假设需要一个完整的URL
+        // 如果你的代理设置是正确的，可以移除此检查
+        if (SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') {
+             throw new Error('系统配置不完整，无法登录。');
         }
-        
-        // 解析JSON响应数据
-        const result = await response.json();
-        return result;
-    } catch (error) {
-        // API调用失败时的容错处理
-        console.warn('Google Apps Script API调用失败，使用模拟登录:', error);
-        // 自动回退到模拟登录模式，确保系统基本功能可用
-        return simulateLogin(username, password);
     }
-}
-
-/**
- * 模拟登录函数（用于演示和容错）
- * 功能：当Google Apps Script不可用时，使用本地模拟数据进行登录验证
- * 参数：username - 用户名, password - 密码
- * 返回：Promise对象，模拟异步登录过程
- * 用途：开发测试、API故障时的备用方案
- */
-function simulateLogin(username, password) {
-    // 预定义的模拟用户数据，用于演示和测试
-    const mockUsers = [
-        { username: 'admin', password: '123456', department: '管理部', employee_id: 1001 },
-        { username: 'zhang.san', password: '123456', department: '技术部', employee_id: 1002 },
-        { username: 'li.si', password: '123456', department: '销售部', employee_id: 1003 },
-        { username: 'wang.wu', password: '123456', department: '财务部', employee_id: 1004 }
-    ];
     
-    // 使用Promise和setTimeout模拟真实的网络请求延迟
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            // 在模拟用户数据中查找匹配的用户名和密码
-            const user = mockUsers.find(u => u.username === username && u.password === password);
-            
-            // 根据查找结果返回相应的登录响应
-            if (user) {
-                // 登录成功，返回用户信息
-                resolve({
-                    success: true,
-                    user: {
-                        username: user.username,
-                        department: user.department,
-                        employee_id: user.employee_id
-                    }
-                });
-            } else {
-                // 登录失败，返回错误信息
-                resolve({
-                    success: false,
-                    message: '用户名或密码错误'
-                });
-            }
-        }, 1000); // 模拟1秒网络延迟，使体验更接近真实API调用
+    // 发送HTTP请求到API端点
+    // 错误将由调用方（表单提交处理器）的try...catch块捕获
+    const response = await fetch(`${API_BASE}/login`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password })
     });
+    
+    // 检查HTTP响应状态
+    if (!response.ok) {
+        // 如果服务器返回错误状态（如404, 500），则抛出错误
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    // 解析并返回JSON响应数据
+    return response.json();
 }
 
 // 显示错误消息

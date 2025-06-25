@@ -1,7 +1,7 @@
 <<<<<<< HEAD
 # 工资查询系统
 
-基于Google Sheets + Vercel的静态工资查询系统，采用无服务器架构设计。
+基于飞书多维表格 + Vercel的静态工资查询系统，采用无服务器架构设计。
 
 ## 系统特性
 
@@ -15,7 +15,7 @@
 
 - **前端**: HTML5/CSS3/JavaScript(ES6+)
 - **后端**: Google Apps Script
-- **数据库**: Google Sheets
+- **数据库**: 飞书多维表格
 - **部署**: Vercel（前端）+ Google Script（后端）
 
 ## 项目结构
@@ -40,13 +40,13 @@
 
 ## 部署指南
 
-### 第一步：设置Google Sheets数据库
+### 第一步：设置飞书多维表格
 
-1. 创建新的Google Sheets文档
-2. 创建两个工作表：
+1. 创建一个新的飞书多维表格
+2. 创建两个数据表：
 
 #### 用户表 (users)
-| 列名 | 类型 | 说明 |
+| 字段名 | 类型 | 说明 |
 |------|------|------|
 | username | 文本 | 用户名（主键） |
 | password | 文本 | 密码（建议存储哈希值） |
@@ -54,23 +54,27 @@
 | employee_id | 数字 | 员工编号 |
 
 #### 工资表 (salaries)
-| 列名 | 类型 | 说明 |
+| 字段名 | 类型 | 说明 |
 |------|------|------|
 | username | 文本 | 关联用户名 |
 | month | 文本 | 月份（格式：YYYY-MM） |
 | base_salary | 数字 | 基础工资 |
 | bonus | 数字 | 奖金 |
 | deduction | 数字 | 扣除项 |
-| net_salary | 公式 | 实发工资（=C2+D2-E2） |
+| net_salary | 数字 | 实发工资 |
 
 ### 第二步：部署Google Apps Script后端
 
-1. 在Google Sheets中打开脚本编辑器：
-   - 点击 `扩展程序` > `Apps Script`
+1. 创建一个新的Google Apps Script项目
 
 2. 将 `google-apps-script.js` 文件内容复制到 `Code.gs` 中
 
-3. 可选：运行 `initializeSampleData()` 函数创建示例数据
+3. 在脚本中配置飞书多维表格的凭证：
+   - `APP_ID`: 你的飞书应用ID
+   - `APP_SECRET`: 你的飞书应用密钥
+   - `APP_TOKEN`: 你的飞书多维表格App Token
+   - `USER_TABLE_ID`: 你的用户表ID
+   - `SALARY_TABLE_ID`: 你的工资表ID
 
 4. 部署为Web应用：
    - 点击 `部署` > `新建部署`
@@ -154,7 +158,7 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec';
    - 监控异常访问
 
 3. **数据备份**：
-   - 定期备份Google Sheets数据
+   - 定期备份飞书多维表格数据
    - 设置适当的共享权限
 
 ## 开发和测试
@@ -185,13 +189,13 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec';
 
 1. **登录失败**
    - 检查Google Apps Script URL是否正确配置
-   - 确认Google Sheets中的用户数据格式正确
-   - 检查网络连接
+   - 确认飞书多维表格中的用户数据格式正确
+   - 检查网络连接和飞书API凭证是否正确
 
 2. **查询无结果**
    - 确认工资表中有对应用户和月份的数据
    - 检查月份格式是否为YYYY-MM
-   - 确认工作表名称为"salaries"
+   - 确认数据表ID配置正确
 
 3. **部署问题**
    - 确认Google Apps Script权限设置正确
@@ -208,7 +212,6 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec';
 2. **后端调试**
    - 在Google Apps Script编辑器中查看执行日志
    - 使用 `console.log()` 添加调试信息
-   - 运行 `testSystem()` 函数测试功能
 
 ## 扩展功能
 
@@ -237,6 +240,6 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec';
 
 如果您在使用过程中遇到问题，请检查：
 1. Google Apps Script的部署状态
-2. Google Sheets的数据格式
+2. 飞书多维表格的数据格式和凭证
 3. 网络连接状况
 4. 浏览器控制台的错误信息

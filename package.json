@@ -1,7 +1,7 @@
 {
   "name": "staff-salary-system",
   "version": "1.0.0",
-  "description": "基于Google Sheets + Vercel的静态工资查询系统",
+  "description": "基于飞书多维表格 + Vercel的静态工资查询系统",
   "main": "public/index.html",
   "scripts": {
     "dev": "npx http-server public -p 3000 -o",
@@ -11,7 +11,9 @@
   },
   "keywords": [
     "salary",
-    "google-sheets",
+    "feishu",
+    "lark",
+    "multitable",
     "vercel",
     "javascript",
     "static-site",
@@ -20,6 +22,9 @@
   ],
   "author": "Your Name",
   "license": "MIT",
+  "dependencies": {
+    "node-fetch": "^3.3.2"
+  },
   "devDependencies": {
     "http-server": "^14.1.1"
   },

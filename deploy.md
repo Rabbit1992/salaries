@@ -1,4 +1,4 @@
-# 部署到Vercel指南
+git# 部署到Vercel指南
 
 ## 前置条件
 
@@ -56,9 +56,12 @@ vercel
 2. **配置CORS**
    - 在Google Apps Script中添加你的Vercel域名到允许的来源
 
-3. **更新前端配置**
+3. **配置飞书凭证**
+   - 在 `google-apps-script.js` 中更新飞书多维表格的 `APP_ID`, `APP_SECRET`, `APP_TOKEN`, `USER_TABLE_ID`, 和 `SALARY_TABLE_ID`
+
+4. **更新前端配置**
    - 在 `public/scripts/auth.js` 和 `public/scripts/salary.js` 中
-   - 将 `GOOGLE_SCRIPT_URL` 更新为你的Google Apps Script Web应用URL
+   - 将 `SCRIPT_URL` 更新为你的Google Apps Script Web应用URL
 
 ## 测试清单
 
@@ -83,6 +86,7 @@ vercel
    - 检查CORS设置
    - 确认Google Apps Script URL正确
    - 验证Google Apps Script已部署为Web应用
+   - 检查飞书API凭证是否正确
 
 3. **登录失败**
    - 系统会自动回退到模拟登录
@@ -96,7 +100,7 @@ vercel
 2. 找到"Environment Variables"部分
 3. 添加：
    - `NODE_ENV`: production
-   - `GOOGLE_SCRIPT_URL`: 你的Google Apps Script URL
+   - `SCRIPT_URL`: 你的Google Apps Script URL
 
 ## 自定义域名（可选）
 
