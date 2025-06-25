@@ -83,22 +83,12 @@ loginForm.addEventListener('submit', async function(e) {
 
 /**
  * 用户登录API调用函数
- * 功能：向Google Apps Script后端发送登录请求进行身份验证
+ * 功能：向Vercel API端点发送登录请求进行身份验证
  * 参数：username - 用户名, password - 密码
  * 返回：Promise对象，包含登录结果
  */
 async function login(username, password) {
-    // 检查是否配置了有效的Google Apps Script URL
-    if (SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE' || SCRIPT_URL === '/api/proxy') {
-        console.error('错误：Google Apps Script URL未配置或为代理地址，请提供真实的部署URL。');
-        // 在实际生产中，代理地址 '/api/proxy' 是有效的，但为了演示清晰，这里假设需要一个完整的URL
-        // 如果你的代理设置是正确的，可以移除此检查
-        if (SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') {
-             throw new Error('系统配置不完整，无法登录。');
-        }
-    }
-    
-    // 发送HTTP请求到API端点
+    // 发送HTTP请求到Vercel API端点
     // 错误将由调用方（表单提交处理器）的try...catch块捕获
     const response = await fetch(`${API_BASE}/login`, {
         method: 'POST',

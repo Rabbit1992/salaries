@@ -85,16 +85,19 @@
 
 5. 复制部署URL（类似：`https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec`）
 
-### 第三步：配置前端
+### 第三步：配置环境变量
 
-1. 编辑 `scripts/auth.js` 和 `scripts/salary.js`
-2. 将 `SCRIPT_URL` 变量替换为您的Google Apps Script部署URL：
+在Vercel部署时，需要配置以下环境变量：
 
-```javascript
-const SCRIPT_URL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec';
+```
+FEISHU_APP_ID=your_app_id
+FEISHU_APP_SECRET=your_app_secret
+FEISHU_APP_TOKEN=your_app_token
+FEISHU_USER_TABLE_ID=your_user_table_id
+FEISHU_SALARY_TABLE_ID=your_salary_table_id
 ```
 
-### 第四步：部署前端到Vercel
+### 第四步：部署到Vercel
 
 1. 将项目代码推送到GitHub仓库
 

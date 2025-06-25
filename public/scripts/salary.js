@@ -167,8 +167,8 @@ async function querySalary() {
 }
 
 /**
- * 获取工资数据API调用函数
- * 功能：向Google Apps Script后端发送工资查询请求
+ * 工资查询API调用函数
+ * 功能：向Vercel API端点发送工资查询请求
  * 参数：
  *   - username: 用户名，用于查询特定用户的工资信息
  *   - month: 查询月份，格式为YYYY-MM
@@ -176,10 +176,6 @@ async function querySalary() {
  * 容错：如果API调用失败，会自动回退到模拟数据
  */
 async function getSalaries(username, month) {
-    if (SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE' || !SCRIPT_URL) {
-        throw new Error('系统配置不完整，无法查询工资。');
-    }
-
     try {
         const response = await fetch(`${API_BASE}/getSalaries`, {
             method: 'POST',
