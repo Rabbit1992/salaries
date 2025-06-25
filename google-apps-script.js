@@ -10,37 +10,48 @@
  */
 
 /**
- * 处理GET请求的主函数
- * @param {Object} e - 请求参数对象
- * @returns {ContentService} JSON响应
+ * Google Apps Script Web应用的主入口函数
+ * 功能：处理来自前端的HTTP GET请求，根据action参数分发到不同的处理函数
+ * 支持的操作：
+ *   - login: 用户登录验证
+ *   - getSalaries: 获取工资数据
+ * @param {Object} e - Google Apps Script提供的请求事件对象，包含URL参数
+ * @returns {ContentService} 返回JSON格式的HTTP响应
  */
 function doGet(e) {
-  // 参数验证
+  // 验证请求参数的有效性，确保e对象和parameter属性存在
   if (!e || !e.parameter) {
     const errorResponse = {
       success: false,
       error: '请求参数无效'
     };
+    // 返回标准的JSON错误响应
     return ContentService
       .createTextOutput(JSON.stringify(errorResponse))
       .setMimeType(ContentService.MimeType.JSON);
   }
   
+  // 从URL参数中获取操作类型
   const action = e.parameter.action;
   let response = {};
   
   try {
-    // 获取当前电子表格
+    // 获取当前Google Sheets电子表格的引用
+    // 注意：此脚本必须绑定到包含用户和工资数据的电子表格
     const sheet = SpreadsheetApp.getActiveSpreadsheet();
     
+    // 根据action参数分发到相应的处理函数
     switch(action) {
       case 'login':
+        // 处理用户登录验证请求
         response = loginUser(e, sheet);
         break;
       case 'getSalaries':
-        response = getSalaries(e, sheet);
+        // 处理工资数据查询请求
+        response = handleGetSalaries(e, sheet);
         break;
       default:
+        // 未知的操作类型
         response = {
           success: false,
           error: '无效的操作类型'
@@ -63,6 +74,8 @@ function doGet(e) {
 
 /**
  * 处理OPTIONS请求（CORS预检）
+ * 功能：为跨域请求提供支持
+ * 设置必要的CORS头部以允许跨域访问
  */
 function doOptions() {
   return ContentService
@@ -71,16 +84,21 @@ function doOptions() {
 }
 
 /**
- * 用户登录验证
- * @param {Object} e - 请求参数
- * @param {Spreadsheet} sheet - 电子表格对象
- * @returns {Object} 登录结果
+ * 用户登录验证函数
+ * 功能：验证用户提供的用户名和密码，支持模拟数据和Google Sheets数据源
+ * 验证流程：
+ *   1. 参数验证
+ *   2. 首先尝试模拟数据验证（用于演示和测试）
+ *   3. 如果模拟数据中未找到，则查询Google Sheets中的users工作表
+ * @param {Object} e - 包含username和password参数的请求对象
+ * @param {Spreadsheet} sheet - Google Sheets电子表格对象
+ * @returns {Object} 包含success状态和用户信息或错误信息的响应对象
  */
 function loginUser(e, sheet) {
   const username = e.parameter.username;
   const password = e.parameter.password;
   
-  // 参数验证
+  // 验证必需参数是否存在
   if (!username || !password) {
     return {
       success: false,
@@ -89,8 +107,10 @@ function loginUser(e, sheet) {
   }
   
   try {
-    // 使用模拟数据进行登录验证（临时解决方案）
-    // 模拟用户数据
+    console.log(`开始验证用户登录: ${username}`);
+    
+    // 第一步：使用预定义的模拟数据进行验证
+    // 这些模拟用户用于演示和测试，无需依赖Google Sheets数据
     const mockUsers = [
       { username: 'admin', password: '123456', department: '管理部', employee_id: 1001 },
       { username: 'zhang.san', password: '123456', department: '技术部', employee_id: 1002 },
@@ -98,10 +118,12 @@ function loginUser(e, sheet) {
       { username: 'wang.wu', password: '123456', department: '财务部', employee_id: 1004 }
     ];
     
-    // 查找匹配的用户
+    // 在模拟用户数据中查找匹配的用户名和密码
     const user = mockUsers.find(u => u.username === username && u.password === password);
     
+    // 如果在模拟数据中找到匹配用户，直接返回成功结果
     if (user) {
+      console.log(`模拟数据验证成功: ${user.username}`);
       return {
         success: true,
         user: {
@@ -112,9 +134,11 @@ function loginUser(e, sheet) {
       };
     }
     
-    // 如果没有找到匹配的模拟用户，尝试从工作表中查找
+    // 第二步：如果模拟数据中未找到匹配用户，则查询Google Sheets中的users工作表
+    console.log('模拟数据中未找到用户，开始查询Google Sheets...');
     try {
-      // 获取用户表数据
+      // 获取名为"users"的工作表
+      // 注意：工作表名称必须严格为"users"（小写）
       const usersSheet = sheet.getSheetByName('users');
       if (!usersSheet) {
         console.error('用户表不存在，请检查工作表名称是否为"users"');
@@ -124,23 +148,27 @@ function loginUser(e, sheet) {
         };
       }
       
+      // 读取工作表中的所有数据
       const usersData = usersSheet.getDataRange().getValues();
       console.log('用户表数据行数:', usersData.length);
       console.log('用户表标题行:', usersData[0]);
       
-      // 跳过标题行，从第二行开始查找
+      // 遍历用户数据，跳过第一行（标题行）
+      // 预期的列结构：A列=username, B列=password, C列=department, D列=employee_id
       for (let i = 1; i < usersData.length; i++) {
         const row = usersData[i];
-        const dbUsername = String(row[0]).trim(); // A列：username，转换为字符串并去除空格
-        const dbPassword = String(row[1]).trim(); // B列：password，转换为字符串并去除空格
-        const department = row[2]; // C列：department
-        const employeeId = row[3]; // D列：employee_id
+        // 从工作表中读取用户数据，并进行字符串转换和空格清理
+        const dbUsername = String(row[0]).trim(); // A列：用户名
+        const dbPassword = String(row[1]).trim(); // B列：密码
+        const department = row[2];                // C列：部门
+        const employeeId = row[3];                // D列：员工ID
         
+        // 输出调试信息，便于排查登录问题
         console.log(`检查用户 ${i}: 表格用户名='${dbUsername}', 输入用户名='${username}', 表格密码='${dbPassword}', 输入密码='${password}'`);
         
-        // 验证用户名和密码
+        // 比较用户名和密码是否完全匹配
         if (dbUsername === username && dbPassword === password) {
-          console.log('找到匹配用户:', dbUsername);
+          console.log('在Google Sheets中找到匹配用户:', dbUsername);
           return {
             success: true,
             user: {
@@ -152,8 +180,10 @@ function loginUser(e, sheet) {
         }
       }
       
+      // 遍历完所有用户数据后仍未找到匹配用户
       console.log('在Google Sheets中未找到匹配的用户');
     } catch (sheetError) {
+      // 处理Google Sheets访问错误
       console.error('工作表查询错误:', sheetError);
       return {
         success: false,
@@ -182,7 +212,7 @@ function loginUser(e, sheet) {
  * @param {Spreadsheet} sheet - 电子表格对象
  * @returns {Object} 工资查询结果
  */
-function getSalaries(e, sheet) {
+function handleGetSalaries(e, sheet) {
   const username = e.parameter.username;
   const month = e.parameter.month;
   
