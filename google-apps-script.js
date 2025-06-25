@@ -21,6 +21,9 @@
 function doPost(e) {
   try {
     const requestData = JSON.parse(e.postData.contents);
+    if (!requestData.action) {
+      return ContentService.createTextOutput(JSON.stringify({ success: false, error: 'Missing action parameter' })).setMimeType(ContentService.MimeType.JSON);
+    }
     e.parameter = requestData;
     return handleRequest(e);
   } catch (error) {
