@@ -1040,14 +1040,18 @@ body {
     }
     
     .sidebar {
-        transform: translateX(-100%);
+        position: fixed !important;
+        transform: translateX(-100%) !important;
         transition: transform 0.3s ease;
         width: 280px;
         z-index: 1001;
+        left: 0;
+        top: 0;
+        height: 100vh;
     }
     
     .sidebar.mobile-open {
-        transform: translateX(0);
+        transform: translateX(0) !important;
     }
     
     .sidebar.mobile-open::before {
