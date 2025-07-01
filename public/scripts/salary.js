@@ -275,12 +275,24 @@ function displaySalaryData(data) {
     // 添加数据行到表格
     data.forEach(salary => {
         const row = document.createElement('tr');
+        
         row.innerHTML = `
             <td>${formatMonth(salary.month)}</td>
-            <td>¥${formatCurrency(salary.basicSalary || 0)}</td>
-            <td>¥${formatCurrency((salary.performanceBonus || 0) + (salary.allowance || 0))}</td>
-            <td>¥${formatCurrency(salary.deduction || 0)}</td>
-            <td class="net-salary">¥${formatCurrency(salary.netSalary || 0)}</td>
+            <td>${formatCurrency(salary.baseSalary || 0)}</td>
+            <td>${formatCurrency(salary.positionSalary || 0)}</td>
+            <td>${formatCurrency(salary.basicPerformance || 0)}</td>
+            <td>${formatCurrency(salary.rewardPerformance || 0)}</td>
+            <td>${formatCurrency(salary.assistantAttendanceBonus || 0)}</td>
+            <td>${formatCurrency(salary.assistantPositionAllowance || 0)}</td>
+            <td>${formatCurrency(salary.assistantSkillAllowance || 0)}</td>
+            <td>${formatCurrency(salary.assistantRetentionSubsidy || 0)}</td>
+            <td>${formatCurrency(salary.other || 0)}</td>
+            <td>${formatCurrency(salary.grossTotal || 0)}</td>
+            <td>${formatCurrency(salary.personalSocialInsurance || 0)}</td>
+            <td>${formatCurrency(salary.personalHousingFund || 0)}</td>
+            <td>${formatCurrency((salary.personalIncomeTax || 0) + (salary.supplementaryTax || 0))}</td>
+            <td>${formatCurrency(salary.deduction || 0)}</td>
+            <td class="net-salary">${formatCurrency(salary.netSalary || 0)}</td>
         `;
         salaryTableBody.appendChild(row);
     });
@@ -300,7 +312,15 @@ function createMobileSalaryCard(salary) {
     const card = document.createElement('div');
     card.className = 'salary-card';
     
-    const bonusAllowance = (salary.performanceBonus || 0) + (salary.allowance || 0);
+    // 计算津贴补助总额
+    const totalAllowance = (salary.assistantAttendanceBonus || 0) + 
+                          (salary.assistantPositionAllowance || 0) + 
+                          (salary.assistantSkillAllowance || 0) + 
+                          (salary.assistantRetentionSubsidy || 0) + 
+                          (salary.other || 0);
+    
+    // 计算总税费
+    const totalTax = (salary.personalIncomeTax || 0) + (salary.supplementaryTax || 0);
     
     card.innerHTML = `
         <div class="salary-card-header">
@@ -308,29 +328,106 @@ function createMobileSalaryCard(salary) {
                 <i class="fas fa-calendar"></i>
                 ${formatMonth(salary.month)}
             </div>
-            <div class="salary-net">¥${formatCurrency(salary.netSalary || 0)}</div>
+            <div class="salary-net">${formatCurrency(salary.netSalary || 0)}</div>
         </div>
         <div class="salary-details">
             <div class="salary-item">
                 <div class="salary-item-label">
                     <i class="fas fa-money-bill"></i>
-                    基础工资
+                    底薪
                 </div>
-                <div class="salary-item-value">¥${formatCurrency(salary.basicSalary || 0)}</div>
+                <div class="salary-item-value">${formatCurrency(salary.baseSalary || 0)}</div>
+            </div>
+            <div class="salary-item">
+                <div class="salary-item-label">
+                    <i class="fas fa-briefcase"></i>
+                    岗位工资
+                </div>
+                <div class="salary-item-value">${formatCurrency(salary.positionSalary || 0)}</div>
             </div>
             <div class="salary-item bonus">
                 <div class="salary-item-label">
-                    <i class="fas fa-star"></i>
-                    奖金津贴
+                    <i class="fas fa-chart-line"></i>
+                    基础绩效
                 </div>
-                <div class="salary-item-value">¥${formatCurrency(bonusAllowance)}</div>
+                <div class="salary-item-value">${formatCurrency(salary.basicPerformance || 0)}</div>
+            </div>
+            <div class="salary-item bonus">
+                <div class="salary-item-label">
+                    <i class="fas fa-trophy"></i>
+                    奖励绩效
+                </div>
+                <div class="salary-item-value">${formatCurrency(salary.rewardPerformance || 0)}</div>
+            </div>
+            <div class="salary-item bonus">
+                <div class="salary-item-label">
+                    <i class="fas fa-award"></i>
+                    协管员全勤奖
+                </div>
+                <div class="salary-item-value">${formatCurrency(salary.assistantAttendanceBonus || 0)}</div>
+            </div>
+            <div class="salary-item bonus">
+                <div class="salary-item-label">
+                    <i class="fas fa-briefcase"></i>
+                    协管员岗位津贴
+                </div>
+                <div class="salary-item-value">${formatCurrency(salary.assistantPositionAllowance || 0)}</div>
+            </div>
+            <div class="salary-item bonus">
+                <div class="salary-item-label">
+                    <i class="fas fa-tools"></i>
+                    协管员职务（技能）津贴
+                </div>
+                <div class="salary-item-value">${formatCurrency(salary.assistantSkillAllowance || 0)}</div>
+            </div>
+            <div class="salary-item bonus">
+                <div class="salary-item-label">
+                    <i class="fas fa-shield-alt"></i>
+                    协管员保留补贴
+                </div>
+                <div class="salary-item-value">${formatCurrency(salary.assistantRetentionSubsidy || 0)}</div>
+            </div>
+            <div class="salary-item bonus">
+                <div class="salary-item-label">
+                    <i class="fas fa-plus-circle"></i>
+                    其他
+                </div>
+                <div class="salary-item-value">${formatCurrency(salary.other || 0)}</div>
+            </div>
+            <div class="salary-item highlight">
+                <div class="salary-item-label">
+                    <i class="fas fa-calculator"></i>
+                    应发合计
+                </div>
+                <div class="salary-item-value">${formatCurrency(salary.grossTotal || 0)}</div>
             </div>
             <div class="salary-item deduction">
                 <div class="salary-item-label">
-                    <i class="fas fa-minus"></i>
-                    扣除项
+                    <i class="fas fa-shield-alt"></i>
+                    个人社保
                 </div>
-                <div class="salary-item-value">¥${formatCurrency(salary.deduction || 0)}</div>
+                <div class="salary-item-value">${formatCurrency(salary.personalSocialInsurance || 0)}</div>
+            </div>
+            <div class="salary-item deduction">
+                <div class="salary-item-label">
+                    <i class="fas fa-home"></i>
+                    个人公积金
+                </div>
+                <div class="salary-item-value">${formatCurrency(salary.personalHousingFund || 0)}</div>
+            </div>
+            <div class="salary-item deduction">
+                <div class="salary-item-label">
+                    <i class="fas fa-percentage"></i>
+                    个人所得税
+                </div>
+                <div class="salary-item-value">${formatCurrency(totalTax)}</div>
+            </div>
+            <div class="salary-item deduction">
+                <div class="salary-item-label">
+                    <i class="fas fa-minus-circle"></i>
+                    扣款
+                </div>
+                <div class="salary-item-value">${formatCurrency(salary.deduction || 0)}</div>
             </div>
         </div>
     `;
@@ -349,9 +446,12 @@ function formatCurrency(amount) {
     // 确保amount是有效数值
     const numAmount = parseFloat(amount);
     if (isNaN(numAmount)) {
-        return '0';
+        return '0.00';
     }
-    return new Intl.NumberFormat('zh-CN').format(numAmount);
+    return numAmount.toLocaleString('zh-CN', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
 }
 
 // 显示无数据消息
@@ -380,13 +480,13 @@ function hideYearSummary() {
 /**
  * 功能：格式化货币显示
  * 参数：amount - 金额数值
- * 返回：格式化后的货币字符串
+ * 返回：格式化后的数字字符串（不含货币符号）
  */
-function formatCurrency(amount) {
-    return `¥${parseFloat(amount || 0).toLocaleString('zh-CN', {
+function formatCurrencyValue(amount) {
+    return parseFloat(amount || 0).toLocaleString('zh-CN', {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
-    })}`;
+    });
 }
 
 /**
@@ -480,15 +580,26 @@ function calculateAndDisplayYearSummary(salaryData) {
     
     // 遍历所有工资记录进行累加
     salaryData.forEach(record => {
-        const basicSalary = parseFloat(getFieldValue(record.basicSalary)) || 0;
-        const performanceBonus = parseFloat(getFieldValue(record.performanceBonus)) || 0;
-        const allowance = parseFloat(getFieldValue(record.allowance)) || 0;
-        const deduction = parseFloat(getFieldValue(record.deduction)) || 0;
-        const netSalary = parseFloat(getFieldValue(record.netSalary)) || 0;
+        const baseSalary = parseFloat(record.baseSalary) || 0;
+        const positionSalary = parseFloat(record.positionSalary) || 0;
+        const basicPerformance = parseFloat(record.basicPerformance) || 0;
+        const rewardPerformance = parseFloat(record.rewardPerformance) || 0;
+        const totalAllowance = (record.assistantAttendanceBonus || 0) + 
+                              (record.assistantPositionAllowance || 0) + 
+                              (record.assistantSkillAllowance || 0) + 
+                              (record.assistantRetentionSubsidy || 0) + 
+                              (record.other || 0);
+        const grossTotal = parseFloat(record.grossTotal) || 0;
+        const totalDeductions = (record.personalSocialInsurance || 0) + 
+                               (record.personalHousingFund || 0) + 
+                               (record.personalIncomeTax || 0) + 
+                               (record.supplementaryTax || 0) + 
+                               (record.deduction || 0);
+        const netSalary = parseFloat(record.netSalary) || 0;
         
-        totalBasic += basicSalary;
-        totalBonus += (performanceBonus + allowance);
-        totalDeduction += deduction;
+        totalBasic += (baseSalary + positionSalary);
+        totalBonus += (basicPerformance + rewardPerformance + totalAllowance);
+        totalDeduction += totalDeductions;
         totalIncome += netSalary;
     });
     
@@ -556,20 +667,28 @@ async function loadSalaryOverview() {
  * 参数：salaryData - 最新月份的工资数据
  */
 function updateRecentMonthData(salaryData) {
-    const basic = parseFloat(salaryData.basicSalary) || 0;
-    const bonus = parseFloat(salaryData.performanceBonus) || 0;
-    const allowance = parseFloat(salaryData.allowance) || 0;
-    const deduction = parseFloat(salaryData.deduction) || 0;
+    const baseSalary = parseFloat(salaryData.baseSalary) || 0;
+    const positionSalary = parseFloat(salaryData.positionSalary) || 0;
+    const basicPerformance = parseFloat(salaryData.basicPerformance) || 0;
+    const rewardPerformance = parseFloat(salaryData.rewardPerformance) || 0;
+    const totalAllowance = (salaryData.assistantAttendanceBonus || 0) + 
+                          (salaryData.assistantPositionAllowance || 0) + 
+                          (salaryData.assistantSkillAllowance || 0) + 
+                          (salaryData.assistantRetentionSubsidy || 0) + 
+                          (salaryData.other || 0);
+    const grossTotal = parseFloat(salaryData.grossTotal) || 0;
+    const totalDeductions = (salaryData.personalSocialInsurance || 0) + 
+                           (salaryData.personalHousingFund || 0) + 
+                           (salaryData.personalIncomeTax || 0) + 
+                           (salaryData.supplementaryTax || 0) + 
+                           (salaryData.deduction || 0);
     const net = parseFloat(salaryData.netSalary) || 0;
-    
-    // 假设公积金为基础工资的12%（可根据实际情况调整）
-    const fund = basic * 0.12;
-    const gross = basic + bonus + allowance;
+    const fund = parseFloat(salaryData.personalHousingFund) || 0;
     
     // 更新显示
     recentMonthTitle.textContent = `${formatMonth(salaryData.month)} 工资`;
-    recentGross.textContent = formatCurrency(gross);
-    recentDeduction.textContent = formatCurrency(deduction);
+    recentGross.textContent = formatCurrency(grossTotal);
+    recentDeduction.textContent = formatCurrency(totalDeductions);
     recentNet.textContent = formatCurrency(net);
     recentFund.textContent = formatCurrency(fund);
 }
@@ -579,27 +698,27 @@ function updateRecentMonthData(salaryData) {
  * 参数：salariesData - 全年工资数据数组
  */
 function updateYearSummaryData(salariesData) {
-    let totalBasic = 0;
-    let totalBonus = 0;
-    let totalAllowance = 0;
-    let totalDeduction = 0;
+    let totalGross = 0;
+    let totalDeductions = 0;
     let totalNet = 0;
+    let totalFund = 0;
     
     // 计算年度总计
     salariesData.forEach(salary => {
-        totalBasic += parseFloat(salary.basicSalary) || 0;
-        totalBonus += parseFloat(salary.performanceBonus) || 0;
-        totalAllowance += parseFloat(salary.allowance) || 0;
-        totalDeduction += parseFloat(salary.deduction) || 0;
+        totalGross += parseFloat(salary.grossTotal) || 0;
+        const monthlyDeductions = (salary.personalSocialInsurance || 0) + 
+                                 (salary.personalHousingFund || 0) + 
+                                 (salary.personalIncomeTax || 0) + 
+                                 (salary.supplementaryTax || 0) + 
+                                 (salary.deduction || 0);
+        totalDeductions += monthlyDeductions;
         totalNet += parseFloat(salary.netSalary) || 0;
+        totalFund += parseFloat(salary.personalHousingFund) || 0;
     });
-    
-    const totalGross = totalBasic + totalBonus + totalAllowance;
-    const totalFund = totalBasic * 0.12; // 假设公积金为基础工资的12%
     
     // 更新显示
     yearGross.textContent = formatCurrency(totalGross);
-    yearDeduction.textContent = formatCurrency(totalDeduction);
+    yearDeduction.textContent = formatCurrency(totalDeductions);
     yearNet.textContent = formatCurrency(totalNet);
     yearFund.textContent = formatCurrency(totalFund);
 }
@@ -609,15 +728,15 @@ function updateYearSummaryData(salariesData) {
  */
 function resetOverviewData() {
     recentMonthTitle.textContent = '暂无数据';
-    recentGross.textContent = '¥0';
-    recentDeduction.textContent = '¥0';
-    recentNet.textContent = '¥0';
-    recentFund.textContent = '¥0';
+    recentGross.textContent = '0.00';
+    recentDeduction.textContent = '0.00';
+    recentNet.textContent = '0.00';
+    recentFund.textContent = '0.00';
     
-    yearGross.textContent = '¥0';
-    yearDeduction.textContent = '¥0';
-    yearNet.textContent = '¥0';
-    yearFund.textContent = '¥0';
+    yearGross.textContent = '0.00';
+    yearDeduction.textContent = '0.00';
+    yearNet.textContent = '0.00';
+    yearFund.textContent = '0.00';
 }
 
 /**

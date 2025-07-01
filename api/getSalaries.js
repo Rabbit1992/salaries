@@ -119,11 +119,43 @@ async function querySalaries(token, employeeId, month) {
         
         return {
           month: getFieldValue(item.fields['年月']),
-          basicSalary: parseFloat(getFieldValue(item.fields['基本工资'])) || 0,
-          performanceBonus: parseFloat(getFieldValue(item.fields['绩效奖金'])) || 0,
-          allowance: parseFloat(getFieldValue(item.fields['津贴补助'])) || 0,
-          deduction: parseFloat(getFieldValue(item.fields['扣除项目'])) || 0,
-          netSalary: parseFloat(getFieldValue(item.fields['实发工资'])) || 0
+          // 基础工资部分
+          baseSalary: parseFloat(getFieldValue(item.fields['底薪'])) || 0,
+          positionSalary: parseFloat(getFieldValue(item.fields['岗位工资'])) || 0,
+          subtotal: parseFloat(getFieldValue(item.fields['小计'])) || 0,
+          
+          // 绩效部分
+          basicPerformance: parseFloat(getFieldValue(item.fields['基础性绩效'])) || 0,
+          rewardPerformance: parseFloat(getFieldValue(item.fields['奖励性绩效'])) || 0,
+          totalAmount: parseFloat(getFieldValue(item.fields['总额'])) || 0,
+          performancePenalty: parseFloat(getFieldValue(item.fields['绩效奖惩'])) || 0,
+          
+          // 协管员津贴部分
+          assistantAttendanceBonus: parseFloat(getFieldValue(item.fields['协管员全勤奖'])) || 0,
+          assistantPositionAllowance: parseFloat(getFieldValue(item.fields['协管员岗位津贴'])) || 0,
+          assistantSkillAllowance: parseFloat(getFieldValue(item.fields['协管员职务（技能）津贴'])) || 0,
+          assistantRetentionSubsidy: parseFloat(getFieldValue(item.fields['协管员保留补贴'])) || 0,
+          
+          // 其他项目
+          other: parseFloat(getFieldValue(item.fields['其他'])) || 0,
+          deduction: parseFloat(getFieldValue(item.fields['扣款'])) || 0,
+          grossTotal: parseFloat(getFieldValue(item.fields['应发合计'])) || 0,
+          
+          // 社保公积金基数
+          socialInsuranceBase: parseFloat(getFieldValue(item.fields['社保缴费基数'])) || 0,
+          housingFundBase: parseFloat(getFieldValue(item.fields['公积金缴费基数'])) || 0,
+          
+          // 个人缴费
+          personalSocialInsurance: parseFloat(getFieldValue(item.fields['个人社保'])) || 0,
+          personalHousingFund: parseFloat(getFieldValue(item.fields['个人公积金'])) || 0,
+          
+          // 税务相关
+          pretaxSubtotal: parseFloat(getFieldValue(item.fields['税前小计'])) || 0,
+          personalIncomeTax: parseFloat(getFieldValue(item.fields['个人所得税'])) || 0,
+          supplementaryTax: parseFloat(getFieldValue(item.fields['补扣个税'])) || 0,
+          
+          // 最终实发
+          netSalary: parseFloat(getFieldValue(item.fields['个人实发合计'])) || 0
         };
       });
     }

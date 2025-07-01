@@ -85,9 +85,9 @@ async function loginUser(username, password, token) {
       success: true,
       user: {
         username: user.fields['用户名'][0]?.text,
-        name: user.fields['部门'][0]?.text, // 实际存储姓名的字段
+        name: user.fields['姓名'][0]?.text,
         employeeId: user.fields['工号'][0]?.text,
-        department: user.fields['部门'][0]?.text // 暂时使用同一字段
+        department: user.fields['姓名'][0]?.text // 使用姓名作为显示名称
       }
     };
   } catch (error) {
