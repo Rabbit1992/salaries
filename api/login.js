@@ -97,7 +97,7 @@ async function loginUser(username, password, token) {
 }
 
 // Vercel Serverless Function 主函数
-export default async function handler(req, res) {
+async function handler(req, res) {
   // 设置CORS头
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -127,7 +127,9 @@ export default async function handler(req, res) {
     }
     
     // 执行登录验证
+    console.log('开始验证用户:', username);
     const result = await loginUser(username, password, token);
+    console.log('登录验证结果:', result);
     
     return res.status(200).json(result);
   } catch (error) {
@@ -135,3 +137,5 @@ export default async function handler(req, res) {
     return res.status(500).json({ success: false, error: '服务器内部错误' });
   }
 }
+
+module.exports = handler;

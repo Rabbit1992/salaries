@@ -4,8 +4,8 @@ const path = require('path');
 const cors = require('cors');
 
 // 导入API处理函数
-const loginHandler = require('./api/login.js').default;
-const getSalariesHandler = require('./api/getSalaries.js').default;
+const loginHandler = require('./api/login.js');
+const getSalariesHandler = require('./api/getSalaries.js');
 
 const app = express();
 const PORT = process.env.PORT || 3000;

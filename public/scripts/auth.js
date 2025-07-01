@@ -60,15 +60,20 @@ loginForm.addEventListener('submit', async function(e) {
         // 调用登录API进行身份验证
         const result = await login(username, password);
         
+        // 添加调试日志
+        console.log('登录结果:', result);
+        
         if (result.success) {
             // 登录成功：将用户信息保存到浏览器本地存储
             localStorage.setItem('currentUser', JSON.stringify(result.user));
             
+            console.log('登录成功，准备跳转到工资查询页面');
             // 跳转到工资查询页面
             window.location.href = 'salary.html';
         } else {
             // 登录失败：显示错误信息
-            showError('用户名或密码错误');
+            console.log('登录失败:', result.error);
+            showError(result.error || '用户名或密码错误');
         }
     } catch (error) {
         // 网络错误或其他异常：记录错误并显示友好提示

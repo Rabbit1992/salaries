@@ -3,326 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>工资查询系统 - 智能薪酬管理</title>
+    <title>工资查询系统</title>
     <link rel="stylesheet" href="styles/main.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
     <div class="app-container">
-        <!-- 侧边导航栏 -->
-        <nav class="sidebar">
-                <div class="sidebar-header">
-                    <i class="fas fa-chart-line"></i>
-                    <span>薪酬管理</span>
+        <!-- 头部区域 -->
+        <header class="app-header">
+            <div class="header-content">
+                <h1 class="app-title">工资查询系统</h1>
+                <div class="user-section">
+                    <div class="user-info">
+                        <i class="fas fa-user-circle"></i>
+                        <span id="userInfo">加载中...</span>
+                    </div>
+                    <button id="logoutBtn" class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
                 </div>
-                <ul class="sidebar-menu">
-                    <li class="menu-item active">
-                        <i class="fas fa-tachometer-alt"></i>
-                        <span>工资概览</span>
-                    </li>
-                </ul>
-            </nav>
-        
+            </div>
+        </header>
+
         <!-- 主内容区域 -->
         <main class="main-content">
-            <!-- 顶部导航栏 -->
-            <header class="top-header">
-                <div class="header-left">
-                    <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                    <h1 class="page-title">
-                        <i class="fas fa-wallet"></i>
-                        工资查询系统
-                    </h1>
-                    <div class="breadcrumb">
-                        <span>首页</span>
-                        <i class="fas fa-chevron-right"></i>
-                        <span>工资管理</span>
+            <!-- 查询面板 -->
+            <section class="query-section">
+                <div class="query-card">
+                    <div class="form-group">
+                        <label for="monthSelect">
+                            <i class="fas fa-calendar-alt"></i>
+                            月份
+                        </label>
+                        <select id="monthSelect" class="form-select">
+                            <option value="">请选择查询月份</option>
+                        </select>
                     </div>
-                </div>
-                <div class="header-right">
-                    <div class="user-profile">
-                        <div class="user-avatar">
-                            <i class="fas fa-user"></i>
-                        </div>
-                        <div class="user-details">
-                            <span id="userInfo" class="user-name">加载中...</span>
-                            <span class="user-role">员工</span>
-                        </div>
-                        <button id="logoutBtn" class="logout-btn">
-                            <i class="fas fa-sign-out-alt"></i>
+                    <div class="form-actions">
+                        <button id="queryBtn" class="btn-primary">
+                            查询
+                        </button>
+                        <button id="yearSummaryBtn" class="btn-secondary">
+                            年度统计
                         </button>
                     </div>
                 </div>
-            </header>
-            
-            <!-- 工资发放情况模块 -->
-            <section class="salary-overview">
-                <div class="overview-header">
-                    <h2>
-                        <i class="fas fa-chart-pie"></i>
-                        工资发放情况
-                    </h2>
-                    <div class="overview-actions">
-                        <button id="refreshOverview" class="btn-icon">
-                            <i class="fas fa-sync-alt"></i>
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="overview-content">
-                    <!-- 最近月份数据 -->
-                    <div class="recent-month-card">
-                        <div class="card-header">
-                            <h3 id="recentMonthTitle">最近月份工资</h3>
-                            <span class="card-badge">最新</span>
-                        </div>
-                        <div class="salary-breakdown">
-                            <div class="breakdown-item">
-                                <span class="item-label">应发</span>
-                                <span class="item-value" id="recentGross">0.00</span>
-                            </div>
-                            <div class="breakdown-item">
-                                <span class="item-label">扣款</span>
-                                <span class="item-value deduction" id="recentDeduction">0.00</span>
-                            </div>
-                            <div class="breakdown-item highlight">
-                                <span class="item-label">实发</span>
-                                <span class="item-value" id="recentNet">0.00</span>
-                            </div>
-                            <div class="breakdown-item">
-                                <span class="item-label">公积金</span>
-                                <span class="item-value" id="recentFund">0.00</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 年度汇总数据 -->
-                    <div class="year-summary-card">
-                        <div class="card-header">
-                            <h3>2025年度汇总</h3>
-                            <span class="card-badge year">年度</span>
-                        </div>
-                        <div class="salary-breakdown">
-                            <div class="breakdown-item">
-                                <span class="item-label">应发</span>
-                                <span class="item-value" id="yearGross">0.00</span>
-                            </div>
-                            <div class="breakdown-item">
-                                <span class="item-label">扣款</span>
-                                <span class="item-value deduction" id="yearDeduction">0.00</span>
-                            </div>
-                            <div class="breakdown-item highlight">
-                                <span class="item-label">实发</span>
-                                <span class="item-value" id="yearNet">0.00</span>
-                            </div>
-                            <div class="breakdown-item">
-                                <span class="item-label">公积金</span>
-                                <span class="item-value" id="yearFund">0.00</span>
-                            </div>
-                        </div>
-                    </div>
+            </section>
+
+            <!-- 工资列表 -->
+            <section id="salaryResult" class="salary-list-section" style="display: none;">
+                <div class="salary-list" id="salaryList">
+                    <!-- 动态生成的工资列表项 -->
                 </div>
             </section>
-            
-            <!-- 查询控制面板 -->
-            <section class="query-panel">
-                <div class="panel-header">
-                    <h2>
-                        <i class="fas fa-filter"></i>
-                        查询筛选
-                    </h2>
-                </div>
-                <div class="panel-content">
-                    <div class="query-controls">
-                        <div class="control-group">
-                            <label for="monthSelect">
-                                <i class="fas fa-calendar-alt"></i>
-                                选择月份
-                            </label>
-                            <select id="monthSelect" class="modern-select">
-                                <option value="">请选择查询月份</option>
-                            </select>
-                        </div>
-                        <div class="control-actions">
-                            <button id="queryBtn" class="btn-primary">
-                                <i class="fas fa-search"></i>
-                                查询工资
-                            </button>
-                            <button id="yearSummaryBtn" class="btn-outline">
-                                <i class="fas fa-chart-line"></i>
-                                年度统计
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </section>
-            
-            <!-- 年度统计看板 -->
-            <section id="yearSummary" class="statistics-panel" style="display: none;">
-                <div class="panel-header">
-                    <h2>
-                        <i class="fas fa-chart-bar"></i>
-                        2025年度统计分析
-                    </h2>
-                    <button class="close-panel" onclick="hideYearSummary()">
+
+            <!-- 年度统计面板 -->
+            <section id="yearSummary" class="year-summary-section" style="display: none;">
+                <div class="summary-header">
+                    <h2>2025年度统计</h2>
+                    <button class="close-btn" onclick="hideYearSummary()">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
-                <div class="statistics-grid">
-                    <div class="stat-card primary">
-                        <div class="stat-icon">
-                            <i class="fas fa-coins"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h3>年度总收入</h3>
-                            <div class="stat-value" id="totalIncome">0.00</div>
-                            <div class="stat-trend positive">
-                                <i class="fas fa-arrow-up"></i>
-                                <span>较去年增长</span>
-                            </div>
-                        </div>
+                <div class="summary-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">年度总收入</span>
+                        <span class="stat-value" id="totalIncome">¥0.00</span>
                     </div>
-                    
-                    <div class="stat-card success">
-                        <div class="stat-icon">
-                            <i class="fas fa-money-bill-wave"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h3>基础工资</h3>
-                            <div class="stat-value" id="totalBasic">0.00</div>
-                            <div class="stat-trend">
-                                <span>稳定收入</span>
-                            </div>
-                        </div>
+                    <div class="stat-item">
+                        <span class="stat-label">基础工资</span>
+                        <span class="stat-value" id="totalBasic">¥0.00</span>
                     </div>
-                    
-                    <div class="stat-card warning">
-                        <div class="stat-icon">
-                            <i class="fas fa-gift"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h3>奖金津贴</h3>
-                            <div class="stat-value" id="totalBonus">0.00</div>
-                            <div class="stat-trend">
-                                <span>绩效奖励</span>
-                            </div>
-                        </div>
+                    <div class="stat-item">
+                        <span class="stat-label">奖金津贴</span>
+                        <span class="stat-value" id="totalBonus">¥0.00</span>
                     </div>
-                    
-                    <div class="stat-card danger">
-                        <div class="stat-icon">
-                            <i class="fas fa-minus-circle"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h3>扣除项目</h3>
-                            <div class="stat-value" id="totalDeduction">0.00</div>
-                            <div class="stat-trend">
-                                <span>税费社保</span>
-                            </div>
-                        </div>
+                    <div class="stat-item">
+                        <span class="stat-label">扣除项目</span>
+                        <span class="stat-value" id="totalDeduction">¥0.00</span>
                     </div>
                 </div>
             </section>
-            
-            <!-- 工资详情表格 -->
-            <section id="salaryResult" class="data-table-section" style="display: none;">
-                <div class="table-header">
-                    <h2>
-                        <i class="fas fa-table"></i>
-                        工资明细
-                    </h2>
-                    <div class="table-actions">
-                        <button class="btn-icon" title="导出数据">
-                            <i class="fas fa-download"></i>
-                        </button>
-                        <button class="btn-icon" title="打印">
-                            <i class="fas fa-print"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="table-container">
-                    <table class="modern-table">
-                        <thead>
-                            <tr>
-                                <th>
-                                    <i class="fas fa-calendar"></i>
-                                    月份
-                                </th>
-                                <th>
-                                    <i class="fas fa-money-bill"></i>
-                                    底薪
-                                </th>
-                                <th>
-                                    <i class="fas fa-briefcase"></i>
-                                    岗位工资
-                                </th>
-                                <th>
-                                    <i class="fas fa-chart-line"></i>
-                                    基础绩效
-                                </th>
-                                <th>
-                                    <i class="fas fa-trophy"></i>
-                                    奖励绩效
-                                </th>
-                                <th>
-                                    <i class="fas fa-award"></i>
-                                    协管员全勤奖
-                                </th>
-                                <th>
-                                    <i class="fas fa-briefcase"></i>
-                                    协管员岗位津贴
-                                </th>
-                                <th>
-                                    <i class="fas fa-tools"></i>
-                                    协管员职务津贴
-                                </th>
-                                <th>
-                                    <i class="fas fa-shield-alt"></i>
-                                    协管员保留补贴
-                                </th>
-                                <th>
-                                    <i class="fas fa-plus-circle"></i>
-                                    其他
-                                </th>
-                                <th>
-                                    <i class="fas fa-calculator"></i>
-                                    应发合计
-                                </th>
-                                <th>
-                                    <i class="fas fa-shield-alt"></i>
-                                    个人社保
-                                </th>
-                                <th>
-                                    <i class="fas fa-home"></i>
-                                    个人公积金
-                                </th>
-                                <th>
-                                    <i class="fas fa-percentage"></i>
-                                    个人所得税
-                                </th>
-                                <th>
-                                    <i class="fas fa-minus-circle"></i>
-                                    扣款
-                                </th>
-                                <th class="highlight">
-                                    <i class="fas fa-hand-holding-usd"></i>
-                                    个人实发合计
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody id="salaryTableBody">
-                        </tbody>
-                    </table>
-                </div>
-                
-                <!-- 移动端卡片布局 -->
-                <div class="mobile-salary-cards" id="mobileSalaryCards">
-                    <!-- 卡片将通过JavaScript动态生成 -->
-                </div>
-            </section>
-            
+
             <!-- 消息提示 -->
             <div id="noDataMessage" class="message-card info" style="display: none;">
                 <div class="message-icon">
@@ -348,8 +110,8 @@
     
     <!-- 加载动画 -->
     <div id="loadingOverlay" class="loading-overlay" style="display: none;">
-        <div class="loading-spinner">
-            <div class="spinner"></div>
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
             <p>正在加载数据...</p>
         </div>
     </div>

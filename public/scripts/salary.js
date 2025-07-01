@@ -16,12 +16,16 @@ const queryBtn = document.getElementById('queryBtn');           // 查询按钮
 const yearSummaryBtn = document.getElementById('yearSummaryBtn'); // 年度汇总按钮
 const yearSummary = document.getElementById('yearSummary');     // 年度汇总显示区域
 const salaryResult = document.getElementById('salaryResult');   // 工资结果显示区域
-const salaryTableBody = document.getElementById('salaryTableBody'); // 工资表格主体
 const noDataMessage = document.getElementById('noDataMessage'); // 无数据提示信息
 const errorMessage = document.getElementById('errorMessage');   // 错误信息显示区域
+// 可选元素 - 如果不存在则为null
 const refreshOverview = document.getElementById('refreshOverview');
+const yearSelect = document.getElementById('yearSelect');
+const exportBtn = document.getElementById('exportBtn');
+const messageDiv = document.getElementById('message');
+const loadingDiv = document.getElementById('loading');
 
-// 工资发放情况模块元素
+// 工资发放情况模块元素 - 可选
 const recentMonthTitle = document.getElementById('recentMonthTitle');
 const recentGross = document.getElementById('recentGross');
 const recentDeduction = document.getElementById('recentDeduction');
@@ -111,8 +115,10 @@ function initializePage() {
     // 绑定各种UI元素的事件处理函数
     bindEvents();
     
-    // 加载工资发放情况概览
-    loadSalaryOverview();
+    // 加载工资发放情况概览（如果相关元素存在）
+    if (recentMonthTitle || yearGross) {
+        loadSalaryOverview();
+    }
 }
 
 /**
@@ -178,8 +184,10 @@ function bindEvents() {
         }
     });
     
-    // 刷新概览按钮点击事件
-    refreshOverview.addEventListener('click', loadSalaryOverview);
+    // 刷新概览按钮点击事件（如果元素存在）
+    if (refreshOverview) {
+        refreshOverview.addEventListener('click', loadSalaryOverview);
+    }
 }
 
 /**
@@ -265,174 +273,194 @@ async function getSalaries(username, month) {
 
 
 
-// 显示工资数据
-function displaySalaryData(data) {
-    // 清空表格和移动端卡片
-    salaryTableBody.innerHTML = '';
-    const mobileSalaryCards = document.getElementById('mobileSalaryCards');
-    mobileSalaryCards.innerHTML = '';
+/**
+ * 显示工资数据到页面
+ * @param {Array} salaryData - 工资数据数组
+ */
+function displaySalaryData(salaryData) {
+    const salaryList = document.getElementById('salaryList');
     
-    // 添加数据行到表格
-    data.forEach(salary => {
-        const row = document.createElement('tr');
-        
-        row.innerHTML = `
-            <td>${formatMonth(salary.month)}</td>
-            <td>${formatCurrency(salary.baseSalary || 0)}</td>
-            <td>${formatCurrency(salary.positionSalary || 0)}</td>
-            <td>${formatCurrency(salary.basicPerformance || 0)}</td>
-            <td>${formatCurrency(salary.rewardPerformance || 0)}</td>
-            <td>${formatCurrency(salary.assistantAttendanceBonus || 0)}</td>
-            <td>${formatCurrency(salary.assistantPositionAllowance || 0)}</td>
-            <td>${formatCurrency(salary.assistantSkillAllowance || 0)}</td>
-            <td>${formatCurrency(salary.assistantRetentionSubsidy || 0)}</td>
-            <td>${formatCurrency(salary.other || 0)}</td>
-            <td>${formatCurrency(salary.grossTotal || 0)}</td>
-            <td>${formatCurrency(salary.personalSocialInsurance || 0)}</td>
-            <td>${formatCurrency(salary.personalHousingFund || 0)}</td>
-            <td>${formatCurrency((salary.personalIncomeTax || 0) + (salary.supplementaryTax || 0))}</td>
-            <td>${formatCurrency(salary.deduction || 0)}</td>
-            <td class="net-salary">${formatCurrency(salary.netSalary || 0)}</td>
-        `;
-        salaryTableBody.appendChild(row);
-    });
+    // 清空之前的显示
+    salaryList.innerHTML = '';
     
-    // 添加数据到移动端卡片
-    data.forEach(salary => {
-        const card = createMobileSalaryCard(salary);
-        mobileSalaryCards.appendChild(card);
-    });
+    if (!salaryData || salaryData.length === 0) {
+        showNoData();
+        return;
+    }
     
-    // 显示结果表格
+    // 显示结果区域
     salaryResult.style.display = 'block';
+    
+    // 为每条工资记录创建列表项
+    salaryData.forEach(record => {
+        const listItem = createSalaryListItem(record);
+        salaryList.appendChild(listItem);
+    });
 }
 
-// 创建移动端工资卡片
-function createMobileSalaryCard(salary) {
-    const card = document.createElement('div');
-    card.className = 'salary-card';
+/**
+ * 创建工资列表项
+ * @param {Object} record - 工资记录
+ * @returns {HTMLElement} 列表项元素
+ */
+function createSalaryListItem(record) {
+    const listItem = document.createElement('div');
+    listItem.className = 'salary-item';
     
-    // 计算津贴补助总额
-    const totalAllowance = (salary.assistantAttendanceBonus || 0) + 
-                          (salary.assistantPositionAllowance || 0) + 
-                          (salary.assistantSkillAllowance || 0) + 
-                          (salary.assistantRetentionSubsidy || 0) + 
-                          (salary.other || 0);
+    // 计算小计（底薪+岗位工资）
+    const subtotal = (parseFloat(record.baseSalary) || 0) + (parseFloat(record.positionSalary) || 0);
     
-    // 计算总税费
-    const totalTax = (salary.personalIncomeTax || 0) + (salary.supplementaryTax || 0);
+    // 计算总额（基础性绩效+奖励性绩效）
+    const performanceTotal = (parseFloat(record.basicPerformance) || 0) + (parseFloat(record.rewardPerformance) || 0);
     
-    card.innerHTML = `
-        <div class="salary-card-header">
-            <div class="salary-month">
-                <i class="fas fa-calendar"></i>
-                ${formatMonth(salary.month)}
-            </div>
-            <div class="salary-net">${formatCurrency(salary.netSalary || 0)}</div>
+    // 计算税前小计
+    const pretaxSubtotal = (parseFloat(record.grossTotal) || 0) - (parseFloat(record.personalSocialInsurance) || 0) - (parseFloat(record.personalHousingFund) || 0);
+    
+    listItem.innerHTML = `
+        <div class="salary-item-header">
+            <span class="month">${formatMonth(record.month)}</span>
+            <span class="net-salary">实发: ${formatCurrency(record.netSalary || 0)}</span>
         </div>
-        <div class="salary-details">
-            <div class="salary-item">
-                <div class="salary-item-label">
-                    <i class="fas fa-money-bill"></i>
-                    底薪
+        <div class="salary-item-details">
+            <!-- 基础工资部分 -->
+            <div class="detail-section">
+                <h4 class="section-title">基础工资</h4>
+                <div class="detail-row">
+                    <span class="label">底薪:</span>
+                    <span class="value">${formatCurrency(record.baseSalary || 0)}</span>
                 </div>
-                <div class="salary-item-value">${formatCurrency(salary.baseSalary || 0)}</div>
+                <div class="detail-row">
+                    <span class="label">岗位工资:</span>
+                    <span class="value">${formatCurrency(record.positionSalary || 0)}</span>
+                </div>
+                <div class="detail-row highlight">
+                    <span class="label">小计:</span>
+                    <span class="value">${formatCurrency(subtotal)}</span>
+                </div>
             </div>
-            <div class="salary-item">
-                <div class="salary-item-label">
-                    <i class="fas fa-briefcase"></i>
-                    岗位工资
+            
+            <!-- 绩效工资部分 -->
+            <div class="detail-section">
+                <h4 class="section-title">绩效工资</h4>
+                <div class="detail-row">
+                    <span class="label">基础性绩效:</span>
+                    <span class="value">${formatCurrency(record.basicPerformance || 0)}</span>
                 </div>
-                <div class="salary-item-value">${formatCurrency(salary.positionSalary || 0)}</div>
+                <div class="detail-row">
+                    <span class="label">奖励性绩效:</span>
+                    <span class="value">${formatCurrency(record.rewardPerformance || 0)}</span>
+                </div>
+                <div class="detail-row highlight">
+                    <span class="label">总额:</span>
+                    <span class="value">${formatCurrency(performanceTotal)}</span>
+                </div>
             </div>
-            <div class="salary-item bonus">
-                <div class="salary-item-label">
-                    <i class="fas fa-chart-line"></i>
-                    基础绩效
+            
+            <!-- 津贴补贴部分 -->
+            <div class="detail-section">
+                <h4 class="section-title">津贴补贴</h4>
+                <div class="detail-row">
+                    <span class="label">绩效奖惩:</span>
+                    <span class="value">${formatCurrency(record.performancePenalty || 0)}</span>
                 </div>
-                <div class="salary-item-value">${formatCurrency(salary.basicPerformance || 0)}</div>
+                <div class="detail-row">
+                    <span class="label">协管员全勤奖:</span>
+                    <span class="value">${formatCurrency(record.assistantAttendanceBonus || 0)}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">协管员岗位津贴:</span>
+                    <span class="value">${formatCurrency(record.assistantPositionAllowance || 0)}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">协管员职务（技能）津贴:</span>
+                    <span class="value">${formatCurrency(record.assistantSkillAllowance || 0)}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">协管员保留补贴:</span>
+                    <span class="value">${formatCurrency(record.assistantRetentionSubsidy || 0)}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">其他:</span>
+                    <span class="value">${formatCurrency(record.other || 0)}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">扣款:</span>
+                    <span class="value">${formatCurrency(record.deduction || 0)}</span>
+                </div>
             </div>
-            <div class="salary-item bonus">
-                <div class="salary-item-label">
-                    <i class="fas fa-trophy"></i>
-                    奖励绩效
+            
+            <!-- 应发合计 -->
+            <div class="detail-section">
+                <h4 class="section-title">应发合计</h4>
+                <div class="detail-row highlight">
+                    <span class="label">应发合计:</span>
+                    <span class="value">${formatCurrency(record.grossTotal || 0)}</span>
                 </div>
-                <div class="salary-item-value">${formatCurrency(salary.rewardPerformance || 0)}</div>
             </div>
-            <div class="salary-item bonus">
-                <div class="salary-item-label">
-                    <i class="fas fa-award"></i>
-                    协管员全勤奖
+            
+            <!-- 社保公积金 -->
+            <div class="detail-section">
+                <h4 class="section-title">社保公积金</h4>
+                <div class="detail-row">
+                    <span class="label">社保缴费基数:</span>
+                    <span class="value">${formatCurrency(record.socialInsuranceBase || 0)}</span>
                 </div>
-                <div class="salary-item-value">${formatCurrency(salary.assistantAttendanceBonus || 0)}</div>
+                <div class="detail-row">
+                    <span class="label">公积金缴费基数:</span>
+                    <span class="value">${formatCurrency(record.housingFundBase || 0)}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">个人社保:</span>
+                    <span class="value">${formatCurrency(record.personalSocialInsurance || 0)}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">个人公积金:</span>
+                    <span class="value">${formatCurrency(record.personalHousingFund || 0)}</span>
+                </div>
             </div>
-            <div class="salary-item bonus">
-                <div class="salary-item-label">
-                    <i class="fas fa-briefcase"></i>
-                    协管员岗位津贴
+            
+            <!-- 个税计算 -->
+            <div class="detail-section">
+                <h4 class="section-title">个税计算</h4>
+                <div class="detail-row">
+                    <span class="label">税前小计:</span>
+                    <span class="value">${formatCurrency(pretaxSubtotal)}</span>
                 </div>
-                <div class="salary-item-value">${formatCurrency(salary.assistantPositionAllowance || 0)}</div>
+                <div class="detail-row">
+                    <span class="label">个人所得税:</span>
+                    <span class="value">${formatCurrency(record.personalIncomeTax || 0)}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">补扣个税:</span>
+                    <span class="value">${formatCurrency(record.supplementaryTax || 0)}</span>
+                </div>
             </div>
-            <div class="salary-item bonus">
-                <div class="salary-item-label">
-                    <i class="fas fa-tools"></i>
-                    协管员职务（技能）津贴
+            
+            <!-- 实发合计 -->
+            <div class="detail-section">
+                <h4 class="section-title">实发合计</h4>
+                <div class="detail-row highlight final">
+                    <span class="label">个人实发合计:</span>
+                    <span class="value">${formatCurrency(record.netSalary || 0)}</span>
                 </div>
-                <div class="salary-item-value">${formatCurrency(salary.assistantSkillAllowance || 0)}</div>
-            </div>
-            <div class="salary-item bonus">
-                <div class="salary-item-label">
-                    <i class="fas fa-shield-alt"></i>
-                    协管员保留补贴
-                </div>
-                <div class="salary-item-value">${formatCurrency(salary.assistantRetentionSubsidy || 0)}</div>
-            </div>
-            <div class="salary-item bonus">
-                <div class="salary-item-label">
-                    <i class="fas fa-plus-circle"></i>
-                    其他
-                </div>
-                <div class="salary-item-value">${formatCurrency(salary.other || 0)}</div>
-            </div>
-            <div class="salary-item highlight">
-                <div class="salary-item-label">
-                    <i class="fas fa-calculator"></i>
-                    应发合计
-                </div>
-                <div class="salary-item-value">${formatCurrency(salary.grossTotal || 0)}</div>
-            </div>
-            <div class="salary-item deduction">
-                <div class="salary-item-label">
-                    <i class="fas fa-shield-alt"></i>
-                    个人社保
-                </div>
-                <div class="salary-item-value">${formatCurrency(salary.personalSocialInsurance || 0)}</div>
-            </div>
-            <div class="salary-item deduction">
-                <div class="salary-item-label">
-                    <i class="fas fa-home"></i>
-                    个人公积金
-                </div>
-                <div class="salary-item-value">${formatCurrency(salary.personalHousingFund || 0)}</div>
-            </div>
-            <div class="salary-item deduction">
-                <div class="salary-item-label">
-                    <i class="fas fa-percentage"></i>
-                    个人所得税
-                </div>
-                <div class="salary-item-value">${formatCurrency(totalTax)}</div>
-            </div>
-            <div class="salary-item deduction">
-                <div class="salary-item-label">
-                    <i class="fas fa-minus-circle"></i>
-                    扣款
-                </div>
-                <div class="salary-item-value">${formatCurrency(salary.deduction || 0)}</div>
             </div>
         </div>
     `;
     
-    return card;
+    return listItem;
+}
+
+/**
+ * 显示无数据状态
+ */
+function showNoData() {
+    const salaryList = document.getElementById('salaryList');
+    salaryList.innerHTML = `
+        <div class="no-data">
+            <p>暂无工资数据</p>
+        </div>
+    `;
+    salaryResult.style.display = 'block';
 }
 
 // 格式化月份显示
@@ -685,12 +713,12 @@ function updateRecentMonthData(salaryData) {
     const net = parseFloat(salaryData.netSalary) || 0;
     const fund = parseFloat(salaryData.personalHousingFund) || 0;
     
-    // 更新显示
-    recentMonthTitle.textContent = `${formatMonth(salaryData.month)} 工资`;
-    recentGross.textContent = formatCurrency(grossTotal);
-    recentDeduction.textContent = formatCurrency(totalDeductions);
-    recentNet.textContent = formatCurrency(net);
-    recentFund.textContent = formatCurrency(fund);
+    // 更新显示（如果元素存在）
+    if (recentMonthTitle) recentMonthTitle.textContent = `${formatMonth(salaryData.month)} 工资`;
+    if (recentGross) recentGross.textContent = formatCurrency(grossTotal);
+    if (recentDeduction) recentDeduction.textContent = formatCurrency(totalDeductions);
+    if (recentNet) recentNet.textContent = formatCurrency(net);
+    if (recentFund) recentFund.textContent = formatCurrency(fund);
 }
 
 /**
@@ -716,27 +744,27 @@ function updateYearSummaryData(salariesData) {
         totalFund += parseFloat(salary.personalHousingFund) || 0;
     });
     
-    // 更新显示
-    yearGross.textContent = formatCurrency(totalGross);
-    yearDeduction.textContent = formatCurrency(totalDeductions);
-    yearNet.textContent = formatCurrency(totalNet);
-    yearFund.textContent = formatCurrency(totalFund);
+    // 更新显示（如果元素存在）
+    if (yearGross) yearGross.textContent = formatCurrency(totalGross);
+    if (yearDeduction) yearDeduction.textContent = formatCurrency(totalDeductions);
+    if (yearNet) yearNet.textContent = formatCurrency(totalNet);
+    if (yearFund) yearFund.textContent = formatCurrency(totalFund);
 }
 
 /**
  * 功能：重置概览数据为默认值
  */
 function resetOverviewData() {
-    recentMonthTitle.textContent = '暂无数据';
-    recentGross.textContent = '0.00';
-    recentDeduction.textContent = '0.00';
-    recentNet.textContent = '0.00';
-    recentFund.textContent = '0.00';
+    if (recentMonthTitle) recentMonthTitle.textContent = '暂无数据';
+    if (recentGross) recentGross.textContent = '0.00';
+    if (recentDeduction) recentDeduction.textContent = '0.00';
+    if (recentNet) recentNet.textContent = '0.00';
+    if (recentFund) recentFund.textContent = '0.00';
     
-    yearGross.textContent = '0.00';
-    yearDeduction.textContent = '0.00';
-    yearNet.textContent = '0.00';
-    yearFund.textContent = '0.00';
+    if (yearGross) yearGross.textContent = '0.00';
+    if (yearDeduction) yearDeduction.textContent = '0.00';
+    if (yearNet) yearNet.textContent = '0.00';
+    if (yearFund) yearFund.textContent = '0.00';
 }
 
 /**
