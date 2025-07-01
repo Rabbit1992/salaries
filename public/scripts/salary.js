@@ -70,7 +70,9 @@ document.addEventListener('DOMContentLoaded', function() {
 // 移动端菜单切换
 function toggleMobileMenu() {
     const sidebar = document.querySelector('.sidebar');
-    sidebar.classList.toggle('mobile-open');
+    if (sidebar) {
+        sidebar.classList.toggle('mobile-open');
+    }
 }
 
 // 初始化响应式功能
@@ -78,7 +80,7 @@ function initializeResponsive() {
     // 监听窗口大小变化
     window.addEventListener('resize', function() {
         const sidebar = document.querySelector('.sidebar');
-        if (window.innerWidth > 768) {
+        if (sidebar && window.innerWidth > 768) {
             // 桌面端时移除移动端类
             sidebar.classList.remove('mobile-open');
         }
@@ -89,7 +91,7 @@ function initializeResponsive() {
         const sidebar = document.querySelector('.sidebar');
         const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
         
-        if (sidebar.classList.contains('mobile-open') && 
+        if (sidebar && mobileMenuBtn && sidebar.classList.contains('mobile-open') && 
             !sidebar.contains(e.target) && 
             !mobileMenuBtn.contains(e.target)) {
             sidebar.classList.remove('mobile-open');

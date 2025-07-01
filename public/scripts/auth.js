@@ -52,9 +52,14 @@ loginForm.addEventListener('submit', async function(e) {
     
     // 获取提交按钮并设置加载状态
     const submitBtn = loginForm.querySelector('button[type="submit"]');
-    const originalText = submitBtn.textContent;  // 保存按钮原始文本
-    submitBtn.innerHTML = '<span class="loading"></span>登录中...';  // 显示加载动画
+    const btnText = submitBtn.querySelector('.btn-text');
+    const btnLoading = submitBtn.querySelector('.btn-loading');
+    
+    // 设置加载状态
+    submitBtn.classList.add('loading');
     submitBtn.disabled = true;  // 禁用按钮防止重复提交
+    btnText.style.display = 'none';
+    btnLoading.style.display = 'inline-block';
     
     try {
         // 调用登录API进行身份验证
@@ -81,8 +86,10 @@ loginForm.addEventListener('submit', async function(e) {
         showError('登录失败，请检查网络连接或稍后重试');
     } finally {
         // 无论成功失败，都要恢复按钮的原始状态
-        submitBtn.textContent = originalText;
+        submitBtn.classList.remove('loading');
         submitBtn.disabled = false;
+        btnText.style.display = 'inline-block';
+        btnLoading.style.display = 'none';
     }
 });
 
