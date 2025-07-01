@@ -43,9 +43,6 @@
                         <button id="queryBtn" class="btn-primary">
                             查询
                         </button>
-                        <button id="yearSummaryBtn" class="btn-secondary">
-                            年度统计
-                        </button>
                     </div>
                 </div>
             </section>
@@ -57,33 +54,7 @@
                 </div>
             </section>
 
-            <!-- 年度统计面板 -->
-            <section id="yearSummary" class="year-summary-section" style="display: none;">
-                <div class="summary-header">
-                    <h2>2025年度统计</h2>
-                    <button class="close-btn" onclick="hideYearSummary()">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <div class="summary-stats">
-                    <div class="stat-item">
-                        <span class="stat-label">年度总收入</span>
-                        <span class="stat-value" id="totalIncome">¥0.00</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">基础工资</span>
-                        <span class="stat-value" id="totalBasic">¥0.00</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">奖金津贴</span>
-                        <span class="stat-value" id="totalBonus">¥0.00</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">扣除项目</span>
-                        <span class="stat-value" id="totalDeduction">¥0.00</span>
-                    </div>
-                </div>
-            </section>
+
 
             <!-- 消息提示 -->
             <div id="noDataMessage" class="message-card info" style="display: none;">

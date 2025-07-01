@@ -13,8 +13,7 @@ const userInfo = document.getElementById('userInfo');           // 用户信息�
 const logoutBtn = document.getElementById('logoutBtn');         // 登出按钮
 const monthSelect = document.getElementById('monthSelect');     // 月份选择下拉框
 const queryBtn = document.getElementById('queryBtn');           // 查询按钮
-const yearSummaryBtn = document.getElementById('yearSummaryBtn'); // 年度汇总按钮
-const yearSummary = document.getElementById('yearSummary');     // 年度汇总显示区域
+
 const salaryResult = document.getElementById('salaryResult');   // 工资结果显示区域
 const noDataMessage = document.getElementById('noDataMessage'); // 无数据提示信息
 const errorMessage = document.getElementById('errorMessage');   // 错误信息显示区域
@@ -172,8 +171,7 @@ function bindEvents() {
     // 为查询按钮绑定点击事件，点击后执行querySalary函数
     queryBtn.addEventListener('click', querySalary);
     
-    // 为年度汇总按钮绑定点击事件，点击后执行showYearSummary函数
-    yearSummaryBtn.addEventListener('click', showYearSummary);
+
     
     // 为月份选择器绑定变化事件，选择不同月份时自动触发查询
     // 这提供了更好的用户体验，无需每次都点击查询按钮
@@ -495,15 +493,9 @@ function hideResults() {
     salaryResult.style.display = 'none';
     noDataMessage.style.display = 'none';
     errorMessage.style.display = 'none';
-    yearSummary.style.display = 'none';
 }
 
-/**
- * 功能：隐藏年度汇总面板
- */
-function hideYearSummary() {
-    yearSummary.style.display = 'none';
-}
+
 
 /**
  * 功能：格式化货币显示
@@ -539,107 +531,9 @@ function showError(message) {
     }, 5000);
 }
 
-/**
- * 显示年度工资汇总
- * 功能：查询2025年全年的工资数据并计算汇总信息
- */
-async function showYearSummary() {
-    // 保存按钮原始文本，并显示加载状态
-    const originalText = yearSummaryBtn.textContent;
-    yearSummaryBtn.innerHTML = '<span class="loading"></span>计算中...';
-    yearSummaryBtn.disabled = true;
-    
-    // 清除之前的显示结果
-    hideResults();
-    
-    try {
-        // 查询2025年全年的工资数据
-        const response = await fetch(`${API_BASE}/getSalaries`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                username: currentUser.username,
-                month: '' // 空字符串表示查询所有月份
-            })
-        });
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        
-        if (data.success && data.data && data.data.length > 0) {
-            // 过滤出2025年的数据
-            const year2025Data = data.data.filter(record => {
-                const month = getFieldValue(record.month);
-                return month && month.startsWith('2025');
-            });
-            
-            if (year2025Data.length > 0) {
-                calculateAndDisplayYearSummary(year2025Data);
-            } else {
-                showError('未找到2025年的工资记录');
-            }
-        } else {
-            showError('未找到工资记录');
-        }
-    } catch (error) {
-        console.error('年度汇总查询失败:', error);
-        showError('年度汇总查询失败，请稍后重试');
-    } finally {
-        // 恢复按钮状态
-        yearSummaryBtn.textContent = originalText;
-        yearSummaryBtn.disabled = false;
-    }
-}
 
-/**
- * 计算并显示年度汇总数据
- * @param {Array} salaryData - 2025年的工资数据数组
- */
-function calculateAndDisplayYearSummary(salaryData) {
-    let totalBasic = 0;
-    let totalBonus = 0;
-    let totalDeduction = 0;
-    let totalIncome = 0;
-    
-    // 遍历所有工资记录进行累加
-    salaryData.forEach(record => {
-        const baseSalary = parseFloat(record.baseSalary) || 0;
-        const positionSalary = parseFloat(record.positionSalary) || 0;
-        const basicPerformance = parseFloat(record.basicPerformance) || 0;
-        const rewardPerformance = parseFloat(record.rewardPerformance) || 0;
-        const totalAllowance = (record.assistantAttendanceBonus || 0) + 
-                              (record.assistantPositionAllowance || 0) + 
-                              (record.assistantSkillAllowance || 0) + 
-                              (record.assistantRetentionSubsidy || 0) + 
-                              (record.other || 0);
-        const grossTotal = parseFloat(record.grossTotal) || 0;
-        const totalDeductions = (record.personalSocialInsurance || 0) + 
-                               (record.personalHousingFund || 0) + 
-                               (record.personalIncomeTax || 0) + 
-                               (record.supplementaryTax || 0) + 
-                               (record.deduction || 0);
-        const netSalary = parseFloat(record.netSalary) || 0;
-        
-        totalBasic += (baseSalary + positionSalary);
-        totalBonus += (basicPerformance + rewardPerformance + totalAllowance);
-        totalDeduction += totalDeductions;
-        totalIncome += netSalary;
-    });
-    
-    // 更新页面显示
-    document.getElementById('totalIncome').textContent = formatCurrency(totalIncome);
-    document.getElementById('totalBasic').textContent = formatCurrency(totalBasic);
-    document.getElementById('totalBonus').textContent = formatCurrency(totalBonus);
-    document.getElementById('totalDeduction').textContent = formatCurrency(totalDeduction);
-    
-    // 显示年度汇总区域
-    yearSummary.style.display = 'block';
-}
+
+
 
 /**
  * 功能：加载工资发放情况概览数据
@@ -676,8 +570,7 @@ async function loadSalaryOverview() {
             // 更新最近月份数据
             updateRecentMonthData(latestSalary);
             
-            // 计算并更新年度汇总数据
-            updateYearSummaryData(data.salaries);
+
         } else {
             // 如果没有数据，显示默认值
             resetOverviewData();
@@ -721,35 +614,7 @@ function updateRecentMonthData(salaryData) {
     if (recentFund) recentFund.textContent = formatCurrency(fund);
 }
 
-/**
- * 功能：更新年度汇总数据显示
- * 参数：salariesData - 全年工资数据数组
- */
-function updateYearSummaryData(salariesData) {
-    let totalGross = 0;
-    let totalDeductions = 0;
-    let totalNet = 0;
-    let totalFund = 0;
-    
-    // 计算年度总计
-    salariesData.forEach(salary => {
-        totalGross += parseFloat(salary.grossTotal) || 0;
-        const monthlyDeductions = (salary.personalSocialInsurance || 0) + 
-                                 (salary.personalHousingFund || 0) + 
-                                 (salary.personalIncomeTax || 0) + 
-                                 (salary.supplementaryTax || 0) + 
-                                 (salary.deduction || 0);
-        totalDeductions += monthlyDeductions;
-        totalNet += parseFloat(salary.netSalary) || 0;
-        totalFund += parseFloat(salary.personalHousingFund) || 0;
-    });
-    
-    // 更新显示（如果元素存在）
-    if (yearGross) yearGross.textContent = formatCurrency(totalGross);
-    if (yearDeduction) yearDeduction.textContent = formatCurrency(totalDeductions);
-    if (yearNet) yearNet.textContent = formatCurrency(totalNet);
-    if (yearFund) yearFund.textContent = formatCurrency(totalFund);
-}
+
 
 /**
  * 功能：重置概览数据为默认值

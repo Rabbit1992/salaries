@@ -331,74 +331,7 @@ body {
     margin-top: 2px;
 }
 
-/* 年度统计面板 */
-.year-summary-section {
-    margin-bottom: 20px;
-}
 
-.summary-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-    padding: 0 4px;
-}
-
-.summary-header h2 {
-    color: white;
-    font-size: 20px;
-    font-weight: 600;
-    margin: 0;
-}
-
-.close-btn {
-    background: rgba(255, 255, 255, 0.2);
-    border: none;
-    color: white;
-    width: 32px;
-    height: 32px;
-    border-radius: 16px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-}
-
-.close-btn:hover {
-    background: rgba(255, 255, 255, 0.3);
-}
-
-.summary-stats {
-    background: white;
-    border-radius: 16px;
-    padding: 20px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-}
-
-.stat-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 0;
-    border-bottom: 1px solid #f0f0f0;
-}
-
-.stat-item:last-child {
-    border-bottom: none;
-}
-
-.stat-label {
-    font-size: 14px;
-    color: #666;
-    font-weight: 500;
-}
-
-.stat-value {
-    font-size: 16px;
-    font-weight: 700;
-    color: #4A90E2;
-}
 
 /* 消息提示 */
 .message-card {
