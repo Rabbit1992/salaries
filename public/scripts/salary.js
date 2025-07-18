@@ -125,7 +125,7 @@ function initializePage() {
 /**
  * 初始化月份选择器函数
  * 功能：生成从2025年1月开始的月份选项供用户选择查询
- * 逻辑：从2025年1月开始，生成到当前月份的所有选项
+ * 逻辑：从2025年1月开始，生成到未来2年的所有选项
  */
 function initializeMonthSelect() {
     const currentDate = new Date();
@@ -136,11 +136,15 @@ function initializeMonthSelect() {
     const startYear = 2025;
     const startMonth = 1;
     
+    // 生成到未来2年的月份选项
+    const endYear = currentYear + 2;
+    const endMonth = 12;
+    
     // 计算需要生成的月份数量
     let year = startYear;
     let month = startMonth;
     
-    while (year < currentYear || (year === currentYear && month <= currentMonth)) {
+    while (year < endYear || (year === endYear && month <= endMonth)) {
         // 格式化月份为两位数字符串（如：01, 02, ..., 12）
         const monthStr = month.toString().padStart(2, '0');
         const value = `${year}-${monthStr}`;     // option的值：YYYY-MM格式
@@ -159,6 +163,8 @@ function initializeMonthSelect() {
             year++;
         }
     }
+    
+    console.log(`月份选择器已初始化：从${startYear}年${startMonth}月到${endYear}年${endMonth}月`);
 }
 
 /**
