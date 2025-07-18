@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>简单登录测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .message {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>简单登录测试</h1>
+        <p>测试登录功能和页面跳转</p>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">用户名:</label>
+                <input type="text" id="username" value="liu.yang" required>
+            </div>
+            <div class="form-group">
+                <label for="password">密码:</label>
+                <input type="password" id="password" value="143721" required>
+            </div>
+            <button type="submit" id="loginBtn">登录</button>
+        </form>
+        
+        <div id="message" style="display: none;"></div>
+        
+        <div style="margin-top: 20px;">
+            <h3>调试信息:</h3>
+            <div id="debugInfo"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '/api';
+        const debugInfo = document.getElementById('debugInfo');
+        const messageDiv = document.getElementById('message');
+        
+        function showMessage(text, type = 'info') {
+            messageDiv.textContent = text;
+            messageDiv.className = `message ${type}`;
+            messageDiv.style.display = 'block';
+        }
+        
+        function addDebugInfo(text) {
+            const p = document.createElement('p');
+            p.textContent = `[${new Date().toLocaleTimeString()}] ${text}`;
+            debugInfo.appendChild(p);
+            console.log(text);
+        }
+        
+        // 检查页面加载状态
+        document.addEventListener('DOMContentLoaded', function() {
+            addDebugInfo('页面DOM加载完成');
+            
+            // 检查localStorage
+            const currentUser = localStorage.getItem('currentUser');
+            if (currentUser) {
+                addDebugInfo(`发现已存储用户: ${currentUser}`);
+                addDebugInfo('按照auth.js逻辑，应该跳转到salary.html');
+                
+                // 模拟auth.js的跳转逻辑
+                setTimeout(() => {
+                    addDebugInfo('执行跳转到salary.html');
+                    window.location.href = 'salary.html';
+                }, 2000);
+            } else {
+                addDebugInfo('localStorage中没有用户信息，停留在登录页面');
+            }
+        });
+        
+        // 登录表单处理
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            
+            addDebugInfo(`开始登录: ${username}`);
+            
+            if (!username || !password) {
+                showMessage('请输入用户名和密码', 'error');
+                return;
+            }
+            
+            const loginBtn = document.getElementById('loginBtn');
+            loginBtn.disabled = true;
+            loginBtn.textContent = '登录中...';
+            
+            try {
+                addDebugInfo('发送登录请求到API');
+                
+                const response = await fetch(`${API_BASE}/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                addDebugInfo(`API响应状态: ${response.status}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                addDebugInfo(`API响应数据: ${JSON.stringify(result)}`);
+                
+                if (result.success) {
+                    addDebugInfo('登录成功，保存用户信息');
+                    localStorage.setItem('currentUser', JSON.stringify(result.user));
+                    
+                    // 验证保存
+                    const saved = localStorage.getItem('currentUser');
+                    addDebugInfo(`验证保存结果: ${saved}`);
+                    
+                    showMessage('登录成功！即将跳转...', 'success');
+                    
+                    addDebugInfo('准备跳转到salary.html');
+                    setTimeout(() => {
+                        addDebugInfo('执行跳转');
+                        window.location.href = 'salary.html';
+                    }, 1500);
+                    
+                } else {
+                    addDebugInfo(`登录失败: ${result.error}`);
+                    showMessage(result.error || '登录失败', 'error');
+                }
+                
+            } catch (error) {
+                addDebugInfo(`登录异常: ${error.message}`);
+                showMessage('登录失败，请检查网络连接', 'error');
+            } finally {
+                loginBtn.disabled = false;
+                loginBtn.textContent = '登录';
+            }
+        });
+        
+        // 添加一些调试按钮
+        const debugButtons = document.createElement('div');
+        debugButtons.style.marginTop = '20px';
+        debugButtons.innerHTML = `
+            <button onclick="localStorage.clear(); location.reload();">清除存储并刷新</button>
+            <button onclick="window.location.href='salary.html'">直接跳转到salary.html</button>
+            <button onclick="window.location.href='index.html'">跳转到原登录页</button>
+        `;
+        document.querySelector('.container').appendChild(debugButtons);
+    </script>
+</body>
+</html>

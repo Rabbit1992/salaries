@@ -33,8 +33,8 @@ async function getTenantAccessToken() {
   }
 }
 
-// 查询用户信息获取工号
-async function getUserEmployeeId(token, username) {
+// 查询用户信息获取姓名
+async function getUserName(token, username) {
   try {
     const url = `https://open.feishu.cn/open-apis/bitable/v1/apps/${feishuConfig.APP_TOKEN}/tables/${feishuConfig.USER_TABLE_ID}/records/search`;
     
@@ -59,24 +59,24 @@ async function getUserEmployeeId(token, username) {
     const data = await response.json();
     if (data.code === 0 && data.data.items.length > 0) {
       // 飞书字段值是对象数组格式，需要提取text属性
-      return data.data.items[0].fields['工号'][0]?.text;
+      return data.data.items[0].fields['姓名'][0]?.text;
     }
     return null;
   } catch (error) {
-    console.error('查询用户工号失败:', error);
+    console.error('查询用户姓名失败:', error);
     return null;
   }
 }
 
 // 查询工资数据
-async function querySalaries(token, employeeId, month) {
+async function querySalaries(token, employeeName, month) {
   try {
     const url = `https://open.feishu.cn/open-apis/bitable/v1/apps/${feishuConfig.APP_TOKEN}/tables/${feishuConfig.SALARY_TABLE_ID}/records/search`;
     
     const conditions = [{
-      field_name: '工号',
+      field_name: '姓名',
       operator: 'is',
-      value: [employeeId]
+      value: [employeeName]
     }];
     
     // 如果指定了月份，添加月份过滤条件
@@ -169,14 +169,14 @@ async function querySalaries(token, employeeId, month) {
 // 获取工资数据主函数
 async function getSalaries(username, month, token) {
   try {
-    // 先获取用户的工号
-    const employeeId = await getUserEmployeeId(token, username);
-    if (!employeeId) {
-      return { success: false, error: '用户不存在或工号未找到' };
+    // 先获取用户的姓名
+    const employeeName = await getUserName(token, username);
+    if (!employeeName) {
+      return { success: false, error: '用户不存在或姓名未找到' };
     }
     
     // 查询工资数据
-    const salaries = await querySalaries(token, employeeId, month);
+    const salaries = await querySalaries(token, employeeName, month);
     
     return {
       success: true,

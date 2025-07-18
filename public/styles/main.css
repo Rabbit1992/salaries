@@ -190,6 +190,9 @@ body {
 /* 按钮加载状态 */
 .login-form .btn-primary .btn-loading {
     display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
 
 .login-form .btn-primary.loading .btn-text {
@@ -197,18 +200,33 @@ body {
 }
 
 .login-form .btn-primary.loading .btn-loading {
-    display: inline-block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .login-form .btn-primary.loading {
-    opacity: 0.8;
+    opacity: 0.9;
     cursor: not-allowed;
     transform: none;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    animation: pulse-loading 2s ease-in-out infinite;
 }
 
 .login-form .btn-primary.loading:hover {
     transform: none;
-    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.2);
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+}
+
+@keyframes pulse-loading {
+    0%, 100% {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.2);
+    }
+    50% {
+        background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+        box-shadow: 0 12px 30px rgba(102, 126, 234, 0.3);
+    }
 }
 
 /* 头部样式 */
@@ -701,9 +719,30 @@ body {
     margin: 0 auto 16px;
 }
 
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+@keyframes smooth-spin {
+    0% { 
+        transform: rotate(0deg);
+        border-top-color: white;
+        border-right-color: rgba(255, 255, 255, 0.6);
+    }
+    25% {
+        border-top-color: rgba(255, 255, 255, 0.6);
+        border-right-color: white;
+    }
+    50% {
+        transform: rotate(180deg);
+        border-top-color: rgba(255, 255, 255, 0.3);
+        border-right-color: rgba(255, 255, 255, 0.8);
+    }
+    75% {
+        border-top-color: rgba(255, 255, 255, 0.8);
+        border-right-color: rgba(255, 255, 255, 0.3);
+    }
+    100% { 
+        transform: rotate(360deg);
+        border-top-color: white;
+        border-right-color: rgba(255, 255, 255, 0.6);
+    }
 }
 
 .loading-content p {
@@ -799,10 +838,11 @@ body {
     display: inline-block;
     width: 16px;
     height: 16px;
-    border: 2px solid rgba(255, 255, 255, 0.3);
+    border: 2px solid rgba(255, 255, 255, 0.2);
     border-radius: 50%;
     border-top-color: white;
-    animation: spin 1s ease-in-out infinite;
+    border-right-color: rgba(255, 255, 255, 0.6);
+    animation: smooth-spin 1.2s cubic-bezier(0.4, 0.0, 0.2, 1) infinite;
     margin-right: 8px;
 }
 

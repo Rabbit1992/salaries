@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试用户列表</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .user-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .user-table th,
+        .user-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        .user-table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        .user-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .user-table tr:hover {
+            background-color: #e9ecef;
+        }
+        .login-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .login-btn:hover {
+            background: #0056b3;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        .error {
+            color: #dc3545;
+            background: #f8d7da;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .info {
+            color: #0c5460;
+            background: #d1ecf1;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        .nav-links {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .nav-links a {
+            color: #007bff;
+            text-decoration: none;
+            margin: 0 15px;
+            padding: 8px 16px;
+            border: 1px solid #007bff;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        .nav-links a:hover {
+            background: #007bff;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 测试用户列表</h1>
+        
+        <div class="nav-links">
+            <a href="index.html">返回登录页面</a>
+            <a href="debug.html">调试页面</a>
+            <a href="users.html">刷新用户列表</a>
+        </div>
+        
+        <div class="info">
+            <strong>使用说明：</strong>
+            <ul>
+                <li>以下是系统中所有可用的测试账号</li>
+                <li>点击"快速登录"按钮可以直接使用该账号登录</li>
+                <li>或者复制用户名和密码到登录页面手动输入</li>
+                <li>如果登录失败，请检查网络连接或联系管理员</li>
+            </ul>
+        </div>
+        
+        <div id="loading" class="loading">
+            正在加载用户列表...
+        </div>
+        
+        <div id="error" class="error" style="display: none;"></div>
+        
+        <table id="userTable" class="user-table" style="display: none;">
+            <thead>
+                <tr>
+                    <th>序号</th>
+                    <th>姓名</th>
+                    <th>用户名</th>
+                    <th>工号</th>
+                    <th>密码</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody id="userTableBody">
+            </tbody>
+        </table>
+    </div>
+    
+    <script>
+        const API_BASE = '/api';
+        
+        async function loadUsers() {
+            try {
+                console.log('开始加载用户列表...');
+                
+                // 获取访问令牌
+                const tokenResponse = await fetch('https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        app_id: 'cli_a8d0a9945631d013',
+                        app_secret: 'Y9Js8PdijoLrfNpmRGdFXfdM7BNWRkvd'
+                    })
+                });
+                
+                const tokenData = await tokenResponse.json();
+                if (tokenData.code !== 0) {
+                    throw new Error('获取访问令牌失败: ' + tokenData.msg);
+                }
+                
+                // 获取用户列表
+                const usersResponse = await fetch(`https://open.feishu.cn/open-apis/bitable/v1/apps/KvyUbXEBpaQVcbsYQcIc3oDnnKc/tables/tblUwpIiulO5QfS4/records`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${tokenData.tenant_access_token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const usersData = await usersResponse.json();
+                if (usersData.code !== 0) {
+                    throw new Error('获取用户列表失败: ' + usersData.msg);
+                }
+                
+                displayUsers(usersData.data.items);
+                
+            } catch (error) {
+                console.error('加载用户列表失败:', error);
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error').style.display = 'block';
+                document.getElementById('error').textContent = '加载用户列表失败: ' + error.message;
+            }
+        }
+        
+        function displayUsers(users) {
+            const tableBody = document.getElementById('userTableBody');
+            const loading = document.getElementById('loading');
+            const table = document.getElementById('userTable');
+            
+            loading.style.display = 'none';
+            table.style.display = 'table';
+            
+            tableBody.innerHTML = '';
+            
+            users.forEach((user, index) => {
+                const fields = user.fields;
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${fields['姓名'] || '未设置'}</td>
+                    <td><strong>${fields['用户名'] || '未设置'}</strong></td>
+                    <td>${fields['工号'] || '未设置'}</td>
+                    <td><code>${fields['密码'] || '未设置'}</code></td>
+                    <td>
+                        <button class="login-btn" onclick="quickLogin('${fields['用户名']}', '${fields['密码']}')">
+                            快速登录
+                        </button>
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+            
+            console.log(`加载了 ${users.length} 个用户`);
+        }
+        
+        async function quickLogin(username, password) {
+            if (!username || !password) {
+                alert('用户名或密码为空，无法登录');
+                return;
+            }
+            
+            try {
+                console.log(`尝试快速登录: ${username}`);
+                
+                const response = await fetch(`${API_BASE}/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // 保存用户信息到本地存储
+                    localStorage.setItem('currentUser', JSON.stringify(result.user));
+                    alert('登录成功！即将跳转到工资查询页面');
+                    window.location.href = 'salary.html';
+                } else {
+                    alert('登录失败: ' + result.error);
+                }
+            } catch (error) {
+                console.error('快速登录失败:', error);
+                alert('登录失败: ' + error.message);
+            }
+        }
+        
+        // 页面加载时自动加载用户列表
+        window.addEventListener('load', loadUsers);
+    </script>
+</body>
+</html>

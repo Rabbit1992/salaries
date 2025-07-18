@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>修复后的工资查询系统测试</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .test-panel {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: #fff;
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            max-width: 300px;
+        }
+        .test-panel h3 {
+            margin: 0 0 10px 0;
+            color: #007bff;
+            font-size: 16px;
+        }
+        .test-btn {
+            display: block;
+            width: 100%;
+            margin: 5px 0;
+            padding: 8px 12px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .test-btn:hover {
+            background: #0056b3;
+        }
+        .test-log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            margin-top: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-size: 12px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- 测试面板 -->
+        <div class="test-panel">
+            <h3>🔧 DOM修复测试</h3>
+            <button class="test-btn" onclick="testDOMElements()">检查DOM元素</button>
+            <button class="test-btn" onclick="testErrorDisplay()">测试错误显示</button>
+            <button class="test-btn" onclick="testPasswordStrength()">测试密码强度</button>
+            <button class="test-btn" onclick="simulateLogin()">模拟登录</button>
+            <button class="test-btn" onclick="clearLog()">清除日志</button>
+            <div id="testLog" class="test-log"></div>
+        </div>
+
+        <!-- 头部区域 -->
+        <header class="app-header">
+            <div class="header-content">
+                <h1 class="app-title">工资查询系统 - 修复测试版</h1>
+                <div class="user-section">
+                    <div class="user-info">
+                        <i class="fas fa-user-circle"></i>
+                        <span id="userInfo">加载中...</span>
+                    </div>
+                    <button id="changePasswordBtn" class="change-password-btn" title="修改密码">
+                        <i class="fas fa-key"></i>
+                    </button>
+                    <button id="logoutBtn" class="logout-btn" title="退出登录">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- 主内容区域 -->
+        <main class="main-content">
+            <!-- 查询面板 -->
+            <section class="query-section">
+                <div class="query-card">
+                    <div class="form-group">
+                        <label for="monthSelect">
+                            <i class="fas fa-calendar-alt"></i>
+                            月份
+                        </label>
+                        <select id="monthSelect" class="form-select">
+                            <option value="">请选择查询月份</option>
+                        </select>
+                    </div>
+                    <div class="form-actions">
+                        <button id="queryBtn" class="btn-primary">
+                            查询
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 工资列表 -->
+            <section id="salaryResult" class="salary-list-section" style="display: none;">
+                <div class="salary-list" id="salaryList">
+                    <!-- 动态生成的工资列表项 -->
+                </div>
+            </section>
+
+            <!-- 消息提示 -->
+            <div id="noDataMessage" class="message-card info" style="display: none;">
+                <div class="message-icon">
+                    <i class="fas fa-info-circle"></i>
+                </div>
+                <div class="message-content">
+                    <h3>暂无数据</h3>
+                    <p>未找到该月份的工资记录，请选择其他月份查询</p>
+                </div>
+            </div>
+            
+            <div id="errorMessage" class="message-card error" style="display: none;">
+                <div class="message-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="message-content">
+                    <h3>查询失败</h3>
+                    <p id="errorText">请稍后重试或联系系统管理员</p>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- 加载动画 -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <p>正在加载数据...</p>
+        </div>
+    </div>
+    
+    <!-- 修改密码模态框 -->
+    <div id="changePasswordModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>修改密码</h3>
+                <button id="closeModalBtn" class="close-modal-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="changePasswordForm">
+                    <div class="form-group">
+                        <label for="currentPassword">
+                            <i class="fas fa-lock"></i>
+                            当前密码
+                        </label>
+                        <input type="password" id="currentPassword" name="currentPassword" placeholder="请输入当前密码" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="newPassword">
+                            <i class="fas fa-key"></i>
+                            新密码
+                        </label>
+                        <input type="password" id="newPassword" name="newPassword" placeholder="请输入新密码" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword">
+                            <i class="fas fa-check-circle"></i>
+                            确认新密码
+                        </label>
+                        <input type="password" id="confirmPassword" name="confirmPassword" placeholder="请再次输入新密码" required>
+                    </div>
+                    <div class="password-strength">
+                        <div class="strength-indicator">
+                            <div class="strength-bar" id="strengthBar"></div>
+                        </div>
+                        <span class="strength-text" id="strengthText">密码强度：弱</span>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" id="cancelChangeBtn" class="btn-secondary">取消</button>
+                        <button type="submit" class="btn-primary">
+                            <span class="btn-text">确认修改</span>
+                            <span class="btn-loading" style="display: none;">修改中...</span>
+                        </button>
+                    </div>
+                </form>
+                <div id="changePasswordError" class="error-message" style="display: none;"></div>
+                <div id="changePasswordSuccess" class="success-message" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 测试函数
+        function log(message) {
+            const testLog = document.getElementById('testLog');
+            const timestamp = new Date().toLocaleTimeString();
+            testLog.innerHTML += `[${timestamp}] ${message}<br>`;
+            testLog.scrollTop = testLog.scrollHeight;
+        }
+        
+        function clearLog() {
+            document.getElementById('testLog').innerHTML = '';
+        }
+        
+        function testDOMElements() {
+            log('=== DOM元素检查 ===');
+            const elements = [
+                'userInfo', 'logoutBtn', 'changePasswordBtn', 'monthSelect', 'queryBtn',
+                'salaryResult', 'noDataMessage', 'errorMessage', 'errorText',
+                'loadingOverlay', 'changePasswordModal', 'strengthBar'
+            ];
+            
+            elements.forEach(id => {
+                const element = document.getElementById(id);
+                log(`${id}: ${element ? '✅ 存在' : '❌ 不存在'}`);
+            });
+            
+            // 检查class选择器
+            const classElements = [
+                '.password-strength',
+                '.strength-text',
+                '#changePasswordForm button[type="submit"]'
+            ];
+            
+            classElements.forEach(selector => {
+                const element = document.querySelector(selector);
+                log(`${selector}: ${element ? '✅ 存在' : '❌ 不存在'}`);
+            });
+        }
+        
+        function testErrorDisplay() {
+            log('=== 测试错误显示 ===');
+            // 模拟showError函数
+            const errorText = document.getElementById('errorText');
+            const errorMessage = document.getElementById('errorMessage');
+            
+            if (errorText) {
+                errorText.textContent = '这是一个测试错误消息';
+                log('✅ 错误文本设置成功');
+            } else {
+                log('❌ errorText元素不存在');
+            }
+            
+            if (errorMessage) {
+                errorMessage.style.display = 'block';
+                log('✅ 错误消息显示成功');
+                
+                setTimeout(() => {
+                    errorMessage.style.display = 'none';
+                    log('✅ 错误消息自动隐藏');
+                }, 3000);
+            } else {
+                log('❌ errorMessage元素不存在');
+            }
+        }
+        
+        function testPasswordStrength() {
+            log('=== 测试密码强度 ===');
+            const strengthBar = document.getElementById('strengthBar');
+            const strengthText = document.querySelector('.strength-text');
+            
+            if (strengthBar) {
+                strengthBar.className = 'strength-bar strong';
+                strengthBar.style.width = '80%';
+                log('✅ 密码强度条更新成功');
+            } else {
+                log('❌ strengthBar元素不存在');
+            }
+            
+            if (strengthText) {
+                strengthText.textContent = '密码强度：强';
+                log('✅ 密码强度文本更新成功');
+            } else {
+                log('❌ 密码强度文本元素不存在');
+            }
+        }
+        
+        function simulateLogin() {
+            log('=== 模拟登录测试 ===');
+            // 设置测试用户信息
+            const testUser = {
+                username: 'test.user',
+                department: '测试部门'
+            };
+            
+            localStorage.setItem('currentUser', JSON.stringify(testUser));
+            log('✅ 用户信息已保存到localStorage');
+            
+            // 模拟页面初始化
+            const userInfo = document.getElementById('userInfo');
+            if (userInfo) {
+                userInfo.textContent = `欢迎，${testUser.username} (${testUser.department})`;
+                log('✅ 用户信息显示成功');
+            } else {
+                log('❌ userInfo元素不存在');
+            }
+        }
+        
+        // 页面加载完成后显示测试信息
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🚀 修复后的工资查询系统测试页面已加载');
+            log('点击上方按钮进行各项功能测试');
+        });
+    </script>
+    
+    <script src="scripts/salary.js"></script>
+</body>
+</html>

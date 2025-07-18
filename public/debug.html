@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录调试页面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .debug-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .log-area {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .error {
+            color: #dc3545;
+            background: #f8d7da;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .success {
+            color: #155724;
+            background: #d4edda;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="debug-container">
+        <h1>登录功能调试页面</h1>
+        <p>此页面用于调试登录问题，会显示详细的请求和响应信息。</p>
+        
+        <form id="debugLoginForm">
+            <div class="form-group">
+                <label for="debugUsername">用户名:</label>
+                <input type="text" id="debugUsername" placeholder="请输入用户名" value="test">
+            </div>
+            <div class="form-group">
+                <label for="debugPassword">密码:</label>
+                <input type="password" id="debugPassword" placeholder="请输入密码" value="123456">
+            </div>
+            <button type="submit">测试登录</button>
+            <button type="button" onclick="clearLogs()">清空日志</button>
+            <button type="button" onclick="testApiConnection()">测试API连接</button>
+        </form>
+        
+        <div id="result"></div>
+    </div>
+    
+    <div class="debug-container">
+        <h2>调试日志</h2>
+        <div id="debugLogs" class="log-area">等待操作...
+</div>
+    </div>
+    
+    <script>
+        const API_BASE = '/api';
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logArea = document.getElementById('debugLogs');
+            const prefix = type === 'error' ? '❌' : type === 'success' ? '✅' : 'ℹ️';
+            logArea.textContent += `[${timestamp}] ${prefix} ${message}\n`;
+            logArea.scrollTop = logArea.scrollHeight;
+        }
+        
+        function clearLogs() {
+            document.getElementById('debugLogs').textContent = '日志已清空\n';
+            document.getElementById('result').innerHTML = '';
+        }
+        
+        async function testApiConnection() {
+            log('测试API连接...');
+            try {
+                const response = await fetch(`${API_BASE}/login`, {
+                    method: 'OPTIONS'
+                });
+                log(`API连接测试 - 状态码: ${response.status}`);
+                log(`API连接测试 - 响应头: ${JSON.stringify(Object.fromEntries(response.headers))}`);
+                if (response.ok) {
+                    log('API端点可访问', 'success');
+                } else {
+                    log('API端点访问异常', 'error');
+                }
+            } catch (error) {
+                log(`API连接失败: ${error.message}`, 'error');
+            }
+        }
+        
+        document.getElementById('debugLoginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('debugUsername').value.trim();
+            const password = document.getElementById('debugPassword').value.trim();
+            const resultDiv = document.getElementById('result');
+            
+            log(`开始登录测试 - 用户名: ${username}`);
+            
+            if (!username || !password) {
+                log('用户名或密码为空', 'error');
+                resultDiv.innerHTML = '<div class="error">请输入用户名和密码</div>';
+                return;
+            }
+            
+            try {
+                log('发送登录请求...');
+                log(`请求URL: ${API_BASE}/login`);
+                log(`请求数据: ${JSON.stringify({username, password: '***'})}`);
+                
+                const response = await fetch(`${API_BASE}/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                log(`响应状态码: ${response.status}`);
+                log(`响应状态文本: ${response.statusText}`);
+                log(`响应头: ${JSON.stringify(Object.fromEntries(response.headers))}`);
+                
+                const responseText = await response.text();
+                log(`原始响应内容: ${responseText}`);
+                
+                let result;
+                try {
+                    result = JSON.parse(responseText);
+                    log(`解析后的响应: ${JSON.stringify(result, null, 2)}`);
+                } catch (parseError) {
+                    log(`JSON解析失败: ${parseError.message}`, 'error');
+                    resultDiv.innerHTML = `<div class="error">服务器响应格式错误: ${responseText}</div>`;
+                    return;
+                }
+                
+                if (response.ok) {
+                    if (result.success) {
+                        log('登录成功!', 'success');
+                        resultDiv.innerHTML = `<div class="success">登录成功!<br>用户信息: ${JSON.stringify(result.user, null, 2)}</div>`;
+                    } else {
+                        log(`登录失败: ${result.error}`, 'error');
+                        resultDiv.innerHTML = `<div class="error">登录失败: ${result.error}</div>`;
+                    }
+                } else {
+                    log(`HTTP错误: ${response.status} ${response.statusText}`, 'error');
+                    resultDiv.innerHTML = `<div class="error">HTTP错误: ${response.status} - ${result.error || response.statusText}</div>`;
+                }
+                
+            } catch (error) {
+                log(`请求异常: ${error.message}`, 'error');
+                log(`错误堆栈: ${error.stack}`, 'error');
+                resultDiv.innerHTML = `<div class="error">网络错误: ${error.message}</div>`;
+            }
+        });
+        
+        // 页面加载时自动测试API连接
+        window.addEventListener('load', function() {
+            log('页面加载完成，开始初始化测试...');
+            setTimeout(testApiConnection, 1000);
+        });
+    </script>
+</body>
+</html>

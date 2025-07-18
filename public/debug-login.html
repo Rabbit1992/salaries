@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工资查询系统 - 登录调试</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <style>
+        .debug-panel {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            width: 300px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 9999;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .debug-panel h4 {
+            margin-bottom: 10px;
+            color: #4CAF50;
+        }
+        .debug-log {
+            margin-bottom: 5px;
+        }
+        .debug-log.error {
+            color: #f44336;
+        }
+        .debug-log.success {
+            color: #4CAF50;
+        }
+        .debug-log.info {
+            color: #2196F3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 装饰性背景元素 -->
+        <div class="bg-decoration">
+            <div class="floating-shape shape-1"></div>
+            <div class="floating-shape shape-2"></div>
+            <div class="floating-shape shape-3"></div>
+            <div class="floating-shape shape-4"></div>
+        </div>
+        
+        <div class="login-form">
+            <!-- 图标装饰 -->
+            <div class="login-icon">
+                <svg width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 4L13.5 7H10.5L9 4L3 7V9H21ZM21 10H3V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V10Z" fill="url(#gradient)"/>
+                    <defs>
+                        <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                </svg>
+            </div>
+            
+            <h1>工资查询系统</h1>
+            <p class="login-subtitle">欢迎回来，请登录您的账户</p>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">用户名</label>
+                    <input type="text" id="username" name="username" placeholder="请输入用户名" value="liu.yang" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">密码</label>
+                    <input type="password" id="password" name="password" placeholder="请输入密码" value="143721" required>
+                </div>
+                <button type="submit" class="btn-primary">
+                    <span class="btn-text">登录</span>
+                    <span class="btn-loading" style="display: none;">
+                        <span class="loading"></span>
+                        登录中...
+                    </span>
+                </button>
+            </form>
+            <div id="errorMessage" class="error-message" style="display: none;"></div>
+        </div>
+    </div>
+    
+    <!-- 调试面板 -->
+    <div class="debug-panel">
+        <h4>调试信息</h4>
+        <div id="debugLogs"></div>
+    </div>
+
+    <script>
+        // 调试日志函数
+        function debugLog(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logDiv = document.createElement('div');
+            logDiv.className = `debug-log ${type}`;
+            logDiv.textContent = `[${timestamp}] ${message}`;
+            document.getElementById('debugLogs').appendChild(logDiv);
+            console.log(`[DEBUG] ${message}`);
+            
+            // 保持最新的20条日志
+            const logs = document.querySelectorAll('.debug-log');
+            if (logs.length > 20) {
+                logs[0].remove();
+            }
+        }
+        
+        // 原始auth.js代码，但添加了调试信息
+        const API_BASE = '/api';
+        
+        const loginForm = document.getElementById('loginForm');
+        const errorMessage = document.getElementById('errorMessage');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        
+        debugLog('页面脚本开始执行');
+        
+        // 检查DOM元素
+        if (loginForm) debugLog('找到登录表单');
+        else debugLog('未找到登录表单', 'error');
+        
+        if (errorMessage) debugLog('找到错误消息元素');
+        else debugLog('未找到错误消息元素', 'error');
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            debugLog('DOM加载完成');
+            
+            const currentUser = localStorage.getItem('currentUser');
+            debugLog(`检查localStorage: ${currentUser ? '有用户信息' : '无用户信息'}`);
+            
+            if (currentUser) {
+                debugLog('发现已登录用户，准备跳转到salary.html', 'success');
+                debugLog(`用户信息: ${currentUser}`);
+                
+                setTimeout(() => {
+                    debugLog('执行跳转到salary.html', 'success');
+                    window.location.href = 'salary.html';
+                }, 1000);
+            } else {
+                debugLog('用户未登录，停留在登录页面');
+            }
+        });
+        
+        loginForm.addEventListener('submit', async function(e) {
+            debugLog('表单提交事件触发');
+            e.preventDefault();
+            
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value.trim();
+            
+            debugLog(`获取输入: 用户名=${username}, 密码长度=${password.length}`);
+            
+            if (!username || !password) {
+                debugLog('用户名或密码为空', 'error');
+                showError('请输入用户名和密码');
+                return;
+            }
+            
+            const submitBtn = loginForm.querySelector('button[type="submit"]');
+            const btnText = submitBtn.querySelector('.btn-text');
+            const btnLoading = submitBtn.querySelector('.btn-loading');
+            
+            debugLog('设置按钮加载状态');
+            submitBtn.classList.add('loading');
+            submitBtn.disabled = true;
+            btnText.style.display = 'none';
+            btnLoading.style.display = 'inline-block';
+            
+            try {
+                debugLog('开始调用登录API');
+                const result = await login(username, password);
+                
+                debugLog(`登录API返回: ${JSON.stringify(result)}`);
+                
+                if (result.success) {
+                    debugLog('登录成功，保存用户信息', 'success');
+                    localStorage.setItem('currentUser', JSON.stringify(result.user));
+                    
+                    // 验证保存
+                    const saved = localStorage.getItem('currentUser');
+                    debugLog(`验证保存: ${saved ? '成功' : '失败'}`, saved ? 'success' : 'error');
+                    
+                    debugLog('准备跳转到salary.html', 'success');
+                    setTimeout(() => {
+                        debugLog('执行跳转', 'success');
+                        window.location.href = 'salary.html';
+                    }, 1000);
+                } else {
+                    debugLog(`登录失败: ${result.error}`, 'error');
+                    showError(result.error || '用户名或密码错误');
+                }
+            } catch (error) {
+                debugLog(`登录异常: ${error.message}`, 'error');
+                showError('登录失败，请检查网络连接或稍后重试');
+            } finally {
+                debugLog('恢复按钮状态');
+                submitBtn.classList.remove('loading');
+                submitBtn.disabled = false;
+                btnText.style.display = 'inline-block';
+                btnLoading.style.display = 'none';
+            }
+        });
+        
+        async function login(username, password) {
+            debugLog(`发送登录请求: ${username}`);
+            
+            const response = await fetch(`${API_BASE}/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username, password })
+            });
+            
+            debugLog(`HTTP响应状态: ${response.status}`);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const result = await response.json();
+            debugLog(`解析响应JSON完成`);
+            return result;
+        }
+        
+        function showError(message) {
+            debugLog(`显示错误: ${message}`, 'error');
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 3000);
+        }
+        
+        function clearError() {
+            errorMessage.style.display = 'none';
+        }
+        
+        usernameInput.addEventListener('focus', clearError);
+        passwordInput.addEventListener('focus', clearError);
+        
+        debugLog('脚本初始化完成');
+    </script>
+</body>
+</html>
